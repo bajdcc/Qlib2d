@@ -39,9 +39,51 @@
     <ClCompile Include="qlib2d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cast.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cparser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="csub.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cvm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_gc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cvm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cast.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="clexer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cparser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="csub.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
