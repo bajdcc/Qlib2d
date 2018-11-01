@@ -6,8 +6,6 @@
 #ifndef CLIB2D_C2DPOLYGON_H
 #define CLIB2D_C2DPOLYGON_H
 
-#include <vector>
-#include <GL/freeglut.h>
 #include "c2dbody.h"
 
 namespace clib {

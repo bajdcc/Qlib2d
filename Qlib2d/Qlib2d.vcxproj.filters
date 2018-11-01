@@ -57,6 +57,45 @@
     <ClCompile Include="cvm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="q2dimpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="q2dhelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2dbody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2dcircle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2dcollision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2dcontact.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2djoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2dpolygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2drevolute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="c2dworld.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="m2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="v2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -86,9 +125,48 @@
     <ClInclude Include="csub.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="q2dhelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2dbody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2dcircle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2dcollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2dcontact.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2djoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2dpolygon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2drevolute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="c2dworld.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="m2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="v2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="qlib2d.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="q2dimpl.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -104,5 +182,8 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Qlib2d.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

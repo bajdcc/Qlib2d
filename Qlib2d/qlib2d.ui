@@ -44,7 +44,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QOpenGLWidget" name="opengl2d"/>
+       <widget class="Q2dImpl" name="opengl2d"/>
       </item>
      </layout>
     </item>
@@ -71,6 +71,13 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Q2dImpl</class>
+   <extends>QOpenGLWidget</extends>
+   <header>q2dimpl.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="qlib2d.qrc"/>
  </resources>

@@ -12,7 +12,7 @@
 
 namespace clib {
 
-    std::chrono::system_clock::time_point c2d_world::last_clock = std::chrono::high_resolution_clock::now();
+    std::chrono::steady_clock::time_point c2d_world::last_clock = std::chrono::high_resolution_clock::now();
     decimal c2d_world::dt = FRAME_SPAN;
     decimal c2d_world::dt_inv = 1.0 * FPS;
     bool c2d_world::paused = false; // 是否暂停
@@ -154,50 +154,34 @@ namespace clib {
         }
     }
 
-    void c2d_world::draw_collision(const collision &c) {
-        glColor3f(0.2f, 0.5f, 0.4f);
-        // 绘制A、B经过SAT计算出来的边
-        glBegin(GL_LINES);
-        v2 ptA1, ptA2;
-        const auto typeA = c.bodyA->type();
-        const auto typeB = c.bodyB->type();
-        if (!c.bodyA->statics) {
-            if (typeA == C2D_POLYGON) {
-                auto bodyA = dynamic_cast<c2d_polygon *>(c.bodyA);
-                ptA1 = bodyA->vertex(c.A.polygon.idx);
-                ptA2 = bodyA->vertex(c.A.polygon.idx + 1);
-                glVertex2d(ptA1.x, ptA1.y);
-                glVertex2d(ptA2.x, ptA2.y);
-            }
-        }
-        if (!c.bodyB->statics) {
-            if (typeB == C2D_POLYGON) {
-                auto bodyB = dynamic_cast<c2d_polygon *>(c.bodyB);
-                auto ptB1 = bodyB->vertex(c.B.polygon.idx);
-                auto ptB2 = bodyB->vertex(c.B.polygon.idx + 1);
-                glVertex2d(ptB1.x, ptB1.y);
-                glVertex2d(ptB2.x, ptB2.y);
-            }
-        }
-        glEnd();
-        /*if (!c.bodyA->statics) {
-            // 绘制A的SAT边法线
-            glColor3f(0.1f, 0.4f, 0.2f);
-            glBegin(GL_LINES);
-            auto pt3 = (ptA1 + ptA2) / 2;
-            auto pt4 = pt3 + c.N * 0.3;
-            glVertex2d(pt3.x, pt3.y);
-            glVertex2d(pt4.x, pt4.y);
-            glEnd();
-        }*/
-        // 绘制接触点
-        glColor3f(1.0f, 0.2f, 0.2f);
-        glPointSize(2.0f);
-        glBegin(GL_POINTS);
+    // https://github.com/erincatto/Box2D/blob/master/Box2D/Dynamics/Contacts/b2ContactSolver.cpp#L127
+    // 碰撞计算准备
+
+    void c2d_world::collision_prepare(collision & c) {
+        static const auto kBiasFactor = COLL_BIAS; // 弹性碰撞系数
+        const auto &a = *c.bodyA;
+        const auto &b = *c.bodyB;
+        auto tangent = c.N.normal(); // 接触面
+                                     // 先计算好碰撞系数相关的量
         for (auto &contact : c.contacts) {
-            glVertex2d(contact.pos.x, contact.pos.y);
+            auto nA = contact.ra.cross(c.N);
+            auto nB = contact.rb.cross(c.N);
+            auto kn = a.mass.inv + b.mass.inv +
+                std::abs(a.inertia.inv) * nA * nA +
+                std::abs(b.inertia.inv) * nB * nB;
+            contact.mass_normal = kn > 0 ? COLL_NORMAL_SCALE / kn : 0.0;
+            auto tA = contact.ra.cross(tangent);
+            auto tB = contact.rb.cross(tangent);
+            auto kt = a.mass.inv + b.mass.inv +
+                std::abs(a.inertia.inv) * tA * tA +
+                std::abs(b.inertia.inv) * tB * tB;
+            contact.mass_tangent = kt > 0 ? COLL_TANGENT_SCALE / kt : 0.0;
+            contact.bias = -kBiasFactor * dt_inv * std::min(0.0, contact.sep);
         }
-        glEnd();
+    }
+
+    void c2d_world::draw_collision(const collision &c) {
+        
     }
 
     void c2d_world::collision_update(collision &c) {
@@ -261,9 +245,6 @@ namespace clib {
 #endif
 
     void c2d_world::step() {
-        glMatrixMode(GL_MODELVIEW); // 转换视图开始绘制
-        glLoadIdentity();
-        glTranslatef(0.0f, 0.0f, -10.0f);
 
         if (!paused) {
             if (animation_id > 0)
@@ -325,18 +306,6 @@ namespace clib {
         }
 
         if (mouse_drag) {
-            glLineWidth(1.0f);
-            glColor3f(0.6f, 0.6f, 0.6f);
-            glBegin(GL_LINES);
-            glVertex2d(global_drag.x, global_drag.y);
-            glVertex2d(global_drag.x + global_drag_offset.x, global_drag.y + global_drag_offset.y);
-            glEnd();
-            glColor3f(0.9f, 0.7f, 0.4f);
-            glPointSize(4.0f);
-            glBegin(GL_POINTS);
-            glVertex2d(global_drag.x, global_drag.y);
-            glVertex2d(global_drag.x + global_drag_offset.x, global_drag.y + global_drag_offset.y);
-            glEnd();
         }
     }
 

@@ -4,7 +4,6 @@
 //
 
 #include "stdafx.h"
-#include <GL/freeglut.h>
 #include "c2drevolute.h"
 #include "c2dworld.h"
 
@@ -53,23 +52,7 @@ namespace clib {
     }
 
     void c2d_revolute_joint::draw() {
-        auto centerA = a->world();
-        auto anchorA = world_anchor_a();
-        auto centerB = b->world();
-        auto anchorB = world_anchor_b();
-
-        auto str = std::min(std::log2(1 + p_acc.magnitude()), 10.0) * 0.08;
-        glColor3d(1 - str, 0.2, 0.2 + str);
-        glBegin(GL_LINES);
-        if (!a->statics) {
-            glVertex2d(centerA.x, centerA.y);
-            glVertex2d(anchorA.x, anchorA.y);
-        }
-        if (!b->statics) {
-            glVertex2d(centerB.x, centerB.y);
-            glVertex2d(anchorB.x, anchorB.y);
-        }
-        glEnd();
+        
     }
 
     v2 c2d_revolute_joint::world_anchor_a() const {

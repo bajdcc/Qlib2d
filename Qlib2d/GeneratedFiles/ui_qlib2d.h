@@ -14,12 +14,12 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QOpenGLWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include "q2dimpl.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -31,7 +31,7 @@ public:
     QVBoxLayout *verticalLayout;
     QLineEdit *console;
     QTextEdit *output;
-    QOpenGLWidget *opengl2d;
+    Q2dImpl *opengl2d;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -67,7 +67,7 @@ public:
 
         verticalLayout->addWidget(output);
 
-        opengl2d = new QOpenGLWidget(centralWidget);
+        opengl2d = new Q2dImpl(centralWidget);
         opengl2d->setObjectName(QStringLiteral("opengl2d"));
 
         verticalLayout->addWidget(opengl2d);

@@ -39,28 +39,7 @@ namespace clib {
         void collision_detection();
         // https://github.com/erincatto/Box2D/blob/master/Box2D/Dynamics/Contacts/b2ContactSolver.cpp#L127
         // 碰撞计算准备
-        void collision_prepare(collision &c) {
-            static const auto kBiasFactor = COLL_BIAS; // 弹性碰撞系数
-            const auto &a = *c.bodyA;
-            const auto &b = *c.bodyB;
-            auto tangent = c.N.normal(); // 接触面
-            // 先计算好碰撞系数相关的量
-            for (auto &contact : c.contacts) {
-                auto nA = contact.ra.cross(c.N);
-                auto nB = contact.rb.cross(c.N);
-                auto kn = a.mass.inv + b.mass.inv +
-                          std::abs(a.inertia.inv) * nA * nA +
-                          std::abs(b.inertia.inv) * nB * nB;
-                contact.mass_normal = kn > 0 ? COLL_NORMAL_SCALE / kn : 0.0;
-                auto tA = contact.ra.cross(tangent);
-                auto tB = contact.rb.cross(tangent);
-                auto kt = a.mass.inv + b.mass.inv +
-                          std::abs(a.inertia.inv) * tA * tA +
-                          std::abs(b.inertia.inv) * tB * tB;
-                contact.mass_tangent = kt > 0 ? COLL_TANGENT_SCALE / kt : 0.0;
-                contact.bias = -kBiasFactor * dt_inv * std::min(0.0, contact.sep);
-            }
-        }
+        void collision_prepare(collision &c);
 
         // 绘制碰撞情况
         void draw_collision(const collision &c);
@@ -103,7 +82,7 @@ namespace clib {
         void run_animation();
 
     public:
-        static std::chrono::system_clock::time_point last_clock;
+        static std::chrono::steady_clock::time_point last_clock;
         static decimal dt;
         static decimal dt_inv;
         static bool paused; // 是否暂停

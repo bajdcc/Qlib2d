@@ -6,9 +6,6 @@
 #ifndef CLIBLISP_TYPES_H
 #define CLIBLISP_TYPES_H
 
-#include <string>
-#include <unordered_map>
-
 using string_t = std::string;
 template<class K, class V> using map_t = std::unordered_map<K, V>;
 

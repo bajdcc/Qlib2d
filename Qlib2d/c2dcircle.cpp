@@ -4,7 +4,6 @@
 //
 
 #include "stdafx.h"
-#include <GL/freeglut.h>
 #include "c2dcircle.h"
 #include "c2dworld.h"
 
@@ -122,84 +121,6 @@ namespace clib {
     }
 
     void c2d_circle::draw() {
-        if (statics) { // 画静态物体
-            glColor3f(0.9f, 0.9f, 0.9f);
-            glBegin(GL_LINE_LOOP);
-            for (auto i = 0; i < CIRCLE_N; i++) {
-                const auto arc = PI2 * i / CIRCLE_N;
-                glVertex2d(pos.x + r.value * std::cos(arc), pos.y + r.value * std::sin(arc));
-            }
-            glEnd();
-            return;
-        }
-#if ENABLE_SLEEP
-        if (sleep) { // 画休眠物体
-            glColor3f(0.3f, 0.3f, 0.3f);
-            glBegin(GL_LINE_LOOP);
-            for (auto i = 0; i < CIRCLE_N; i++) {
-                const auto arc = PI2 * i / CIRCLE_N;
-                glVertex2d(pos.x + r.value * std::cos(arc), pos.y + r.value * std::sin(arc));
-            }
-            glEnd();
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glPointSize(1.0f);
-            glBegin(GL_POINTS);
-            glVertex2d(pos.x, pos.y); // 中心
-            glEnd();
-            return;
-        }
-#endif
-        // 开启反走样
-        glEnable(GL_BLEND);
-        glEnable(GL_LINE_SMOOTH);
-        glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glColor3f(0.12f, 0.12f, 0.12f); // 坑：所有设置要放begin之前，切记！
-        glBegin(GL_LINE_LOOP);
-        const auto boundMin = pos - r.value;
-        const auto boundMax = pos + r.value;
-        glVertex2d(boundMin.x, boundMin.y);
-        glVertex2d(boundMin.x, boundMax.y);
-        glVertex2d(boundMax.x, boundMax.y);
-        glVertex2d(boundMax.x, boundMin.y);
-        glEnd();
-        if (collision > 0)
-            glColor3f(0.8f, 0.2f, 0.4f);
-        else
-            glColor3f(0.8f, 0.8f, 0.0f);
-        glBegin(GL_LINE_LOOP);
-        for (auto i = 0; i < CIRCLE_N; i++) {
-            const auto arc = PI2 * i / CIRCLE_N;
-            glVertex2d(pos.x + r.value * std::cos(arc), pos.y + r.value * std::sin(arc));
-        }
-        glEnd();
-        // 这里默认物体是中心对称的，重心就是中心，后面会计算重心
-        auto p = pos;
-        auto v = p + V * 0.2;
-        glLineWidth(0.6f);
-        glColor3f(0.8f, 0.2f, 0.2f);
-        glBegin(GL_LINES);
-        glVertex2d(p.x, p.y);
-        glVertex2d(p.x + (Fa.x >= 0 ? 0.2 : -0.2) * std::log10(1 + std::abs(Fa.x) * 5),
-                   p.y + (Fa.y >= 0 ? 0.2 : -0.2) * std::log10(1 + std::abs(Fa.y) * 5)); // 力向量
-        glEnd();
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glBegin(GL_LINES);
-        glVertex2d(p.x, p.y);
-        glVertex2d(v.x, v.y); // 速度向量
-        glEnd();
-        glColor3f(0.2f, 0.2f, 0.2f);
-        glBegin(GL_LINES);
-        glVertex2d(p.x, p.y);
-        glVertex2d(p.x + std::cos(angle) * 0.2, p.y + std::sin(angle) * 0.2); // 方向向量
-        glEnd();
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glPointSize(3.0f);
-        glBegin(GL_POINTS);
-        glVertex2d(p.x, p.y); // 中心
-        glEnd();
-        glDisable(GL_BLEND);
-        glDisable(GL_LINE_SMOOTH);
-        glLineWidth(1.0f);
+        
     }
 }

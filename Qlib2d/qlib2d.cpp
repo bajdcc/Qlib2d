@@ -10,16 +10,22 @@ Qlib2d::Qlib2d(QWidget *parent)
 void Qlib2d::execLispCommand()
 {
     auto code = ui.console->text();
-    ui.console->setText("");
+    ui.console->setText(tr(""));
     if (code.isEmpty())
         return;
+    if (code == tr("exit"))
+    {
+        close();
+        return;
+    }
+        
     try {
         parser = std::make_unique<clib::cparser>(code.toStdString());
         auto node = parser->parse();
         vm.prepare(node);
     }
     catch (const std::exception &e) {
-        ui.output->setText("Error");
+        ui.output->setText(tr("Error"));
         parser.reset(nullptr);
         return;
     }
@@ -35,7 +41,7 @@ void Qlib2d::execLispCommand()
         parser.reset(nullptr);
     }
     catch (const std::exception &e) {
-        ui.output->setText("Error");
+        ui.output->setText(tr("Error"));
         vm.restore();
         vm.gc();
         parser.reset(nullptr);
