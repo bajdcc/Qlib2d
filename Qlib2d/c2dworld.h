@@ -17,6 +17,9 @@
 #include "cvm.h"
 #include "cparser.h"
 
+
+class Q2dHelper;
+
 namespace clib {
 
     class c2d_world {
@@ -42,7 +45,7 @@ namespace clib {
         void collision_prepare(collision &c);
 
         // 绘制碰撞情况
-        void draw_collision(const collision &c);
+        void draw_collision(Q2dHelper * helper, const collision &c);
 
         // https://github.com/erincatto/Box2D/blob/master/Box2D/Dynamics/Contacts/b2ContactSolver.cpp#L324
         // 碰撞计算
@@ -53,7 +56,7 @@ namespace clib {
         void collision_remove_sleep();
 #endif
 
-        void step();
+        void step(Q2dHelper * helper);
         void move(const v2 &v);
         void rotate(decimal d);
         void offset(const v2 &pt, const v2 &offset);
@@ -76,6 +79,8 @@ namespace clib {
         size_t get_sleeping_size() const;
         void invert_gravity();
 
+        void set_helper(Q2dHelper * helper);
+
     private:
         void start_animation(uint32_t id);
         void stop_animation();
@@ -93,6 +98,8 @@ namespace clib {
         std::string animation_code;
         cvm vm;
         cparser *parser;
+
+        Q2dHelper *helper;
 
         bool mouse_drag{false};
         v2 global_drag; // 鼠标拖动

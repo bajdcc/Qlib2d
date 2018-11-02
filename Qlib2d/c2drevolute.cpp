@@ -51,7 +51,7 @@ namespace clib {
         }
     }
 
-    void c2d_revolute_joint::draw() {
+    void c2d_revolute_joint::draw(Q2dHelper * helper) {
         
     }
 

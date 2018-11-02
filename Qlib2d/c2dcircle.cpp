@@ -120,7 +120,7 @@ namespace clib {
         angleV += inertia.inv * (pt - pos).cross(offset);
     }
 
-    void c2d_circle::draw() {
+    void c2d_circle::draw(Q2dHelper * helper) {
         
     }
 }

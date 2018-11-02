@@ -8,6 +8,8 @@
 
 #include "c2dbody.h"
 
+class Q2dHelper;
+
 namespace clib {
     // 关节
     class c2d_joint {
@@ -16,7 +18,7 @@ namespace clib {
 
         virtual void prepare(const v2 &gravity) = 0; // 预处理
         virtual void update(const v2 &gravity) = 0; // 计算
-        virtual void draw() = 0; // 绘制
+        virtual void draw(Q2dHelper * helper) = 0; // 绘制
 
         c2d_joint(c2d_body *_a, c2d_body *_b);
 

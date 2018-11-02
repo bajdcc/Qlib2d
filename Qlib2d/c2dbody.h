@@ -11,6 +11,8 @@
 #include "v2.h"
 #include "m2.h"
 
+class Q2dHelper;
+
 namespace clib {
     enum c2d_body_t {
         C2D_POLYGON,
@@ -44,7 +46,7 @@ namespace clib {
         // i=1，第一阶段：计算速度、角速度
         // i=2，第二阶段，计算位置等其他量
         virtual void update(v2 gravity, int) = 0; // 状态更新
-        virtual void draw() = 0; // 绘制
+        virtual void draw(Q2dHelper * helper) = 0; // 绘制
 
         v2 rotate(const v2 &v) const;
 

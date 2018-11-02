@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <random>
 #include "c2dworld.h"
+#include "q2dhelper.h"
 #include "cparser.h"
 #include "csub.h"
 
@@ -180,7 +181,7 @@ namespace clib {
         }
     }
 
-    void c2d_world::draw_collision(const collision &c) {
+    void c2d_world::draw_collision(Q2dHelper * helper, const collision &c) {
         
     }
 
@@ -244,9 +245,24 @@ namespace clib {
     }
 #endif
 
-    void c2d_world::step() {
+    void c2d_world::step(Q2dHelper * helper) {
+
+        auto now = std::chrono::high_resolution_clock::now();
+        // 计算每帧时间间隔
+        dt = std::chrono::duration_cast<std::chrono::duration<double>>(now - last_clock).count();
+
+        // 锁帧
+        if (dt > FRAME_SPAN) {
+            dt_inv = 1.0 / dt;
+            last_clock = now;
+        }
+        else
+        {
+            return;
+        }
 
         if (!paused) {
+
             if (animation_id > 0)
                 run_animation();
 
@@ -293,16 +309,16 @@ namespace clib {
 #endif
 
         for (auto &body : static_bodies) {
-            body->draw();
+            body->draw(helper);
         }
         for (auto &body : bodies) {
-            body->draw();
+            body->draw(helper);
         }
         for (auto &col : collisions) {
-            draw_collision(col.second);
+            draw_collision(helper, col.second);
         }
         for (auto &joint : joints) {
-            joint->draw();
+            joint->draw(helper);
         }
 
         if (mouse_drag) {
@@ -370,10 +386,10 @@ namespace clib {
     }
 
     void c2d_world::make_bound() {
-        make_rect(inf, 10, 0.1, {0, 3}, true)->f = 0.8;
-        make_rect(inf, 10, 0.1, {0, -3}, true)->f = 0.8;
-        make_rect(inf, 0.1, 6, {5, 0}, true)->f = 0.8;
-        make_rect(inf, 0.1, 6, {-5, 0}, true)->f = 0.8;
+        make_rect(inf, 1.65, 0.05, {0, -0.425}, true)->f = 0.8;
+        make_rect(inf, 1.65, 0.05, {0, 0.425}, true)->f = 0.8;
+        make_rect(inf, 0.05, 0.9, {0.8, 0}, true)->f = 0.8;
+        make_rect(inf, 0.05, 0.9, {-0.8, 0}, true)->f = 0.8;
     }
 
     void c2d_world::scene(int id) {
@@ -539,6 +555,11 @@ namespace clib {
             body->sleep = false;
 #endif
         }
+    }
+
+    void c2d_world::set_helper(Q2dHelper * helper)
+    {
+        this->helper = helper;
     }
 
     void c2d_world::start_animation(uint32_t id) {

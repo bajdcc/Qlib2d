@@ -32,7 +32,7 @@
 
 namespace clib {
 
-    using decimal = double; // 浮点类型
+    using decimal = qreal; // 浮点类型
     static const auto inf = std::numeric_limits<decimal>::infinity();
 
     // 浮点带倒数

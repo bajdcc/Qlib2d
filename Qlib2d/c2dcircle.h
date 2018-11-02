@@ -8,6 +8,8 @@
 
 #include "c2dbody.h"
 
+class Q2dHelper;
+
 namespace clib {
 // 圆形刚体（正圆）
     class c2d_circle : public c2d_body {
@@ -47,7 +49,7 @@ namespace clib {
         // 拖拽物体
         void drag(const v2 &pt, const v2 &offset) override;
 
-        void draw() override;
+        void draw(Q2dHelper * helper) override;
 
         decimal_square r; // 半径
     };

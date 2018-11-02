@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "c2dpolygon.h"
 #include "c2dworld.h"
+#include "q2dhelper.h"
 
 namespace clib {
 
@@ -218,8 +219,11 @@ namespace clib {
         angleV += inertia.inv * (pt - pos - center).cross(offset);
     }
 
-    void c2d_polygon::draw() {
-        
+    void c2d_polygon::draw(Q2dHelper * helper) {
+        if (statics) { // »­¾²Ì¬ÎïÌå
+            helper->paint_polygon(verticesWorld, true);
+            return;
+        }
     }
 
     v2 c2d_polygon::edge(size_t idx) const {

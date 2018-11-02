@@ -8,6 +8,8 @@
 
 #include "c2dbody.h"
 
+class Q2dHelper;
+
 namespace clib {
     // 多边形刚体（仅支持凸多边形，且点集为有序排列）
     class c2d_polygon : public c2d_body {
@@ -67,7 +69,7 @@ namespace clib {
         // 拖拽物体
         void drag(const v2 &pt, const v2 &offset) override;
 
-        void draw() override;
+        void draw(Q2dHelper * helper) override;
 
         // 以idx为起点，下一顶点为终点的向量
         v2 edge(size_t idx) const;

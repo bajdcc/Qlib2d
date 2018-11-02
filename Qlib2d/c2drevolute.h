@@ -8,6 +8,8 @@
 
 #include "c2djoint.h"
 
+class Q2dHelper;
+
 namespace clib {
     // Ðý×ª¹Ø½Ú
     class c2d_revolute_joint : public c2d_joint {
@@ -16,7 +18,7 @@ namespace clib {
 
         void update(const v2 &gravity) override;
 
-        void draw() override;
+        void draw(Q2dHelper * helper) override;
 
         v2 world_anchor_a() const;
 
