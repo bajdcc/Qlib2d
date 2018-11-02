@@ -4,8 +4,6 @@
 //
 
 #include "stdafx.h"
-#include <algorithm>
-#include <random>
 #include "c2dworld.h"
 #include "q2dhelper.h"
 #include "cparser.h"
@@ -13,7 +11,7 @@
 
 namespace clib {
 
-    std::chrono::steady_clock::time_point c2d_world::last_clock = std::chrono::high_resolution_clock::now();
+    QTime c2d_world::last_clock = QTime::currentTime();
     decimal c2d_world::dt = FRAME_SPAN;
     decimal c2d_world::dt_inv = 1.0 * FPS;
     bool c2d_world::paused = false; // ÊÇ·ñÔÝÍ£
@@ -182,7 +180,28 @@ namespace clib {
     }
 
     void c2d_world::draw_collision(Q2dHelper * helper, const collision &c) {
-        
+        v2 ptA1, ptA2;
+        const auto typeA = c.bodyA->type();
+        const auto typeB = c.bodyB->type();
+        if (!c.bodyA->statics) {
+            if (typeA == C2D_POLYGON) {
+                auto bodyA = dynamic_cast<c2d_polygon *>(c.bodyA);
+                ptA1 = bodyA->vertex(c.A.polygon.idx);
+                ptA2 = bodyA->vertex(c.A.polygon.idx + 1);
+                helper->paint_line(ptA1, ptA2, Q2dHelper::PAINT_TYPE::N);
+            }
+        }
+        if (!c.bodyB->statics) {
+            if (typeB == C2D_POLYGON) {
+                auto bodyB = dynamic_cast<c2d_polygon *>(c.bodyB);
+                auto ptB1 = bodyB->vertex(c.B.polygon.idx);
+                auto ptB2 = bodyB->vertex(c.B.polygon.idx + 1);
+                helper->paint_line(ptB1, ptB2, Q2dHelper::PAINT_TYPE::N);
+            }
+        }
+        for (auto &contact : c.contacts) {
+            helper->paint_point(contact.pos, Q2dHelper::PAINT_TYPE::Contact);
+        }
     }
 
     void c2d_world::collision_update(collision &c) {
@@ -247,13 +266,13 @@ namespace clib {
 
     void c2d_world::step(Q2dHelper * helper) {
 
-        auto now = std::chrono::high_resolution_clock::now();
+        auto now = QTime::currentTime();
         // ¼ÆËãÃ¿Ö¡Ê±¼ä¼ä¸ô
-        dt = std::chrono::duration_cast<std::chrono::duration<double>>(now - last_clock).count();
+        dt = last_clock.msecsTo(now) * 0.001;
 
         // ËøÖ¡
         if (dt > FRAME_SPAN) {
-            dt = qMin(dt, FRAME_SPAN * 2);
+            dt = std::min(dt, FRAME_SPAN);
             dt_inv = 1.0 / dt;
             last_clock = now;
         }
@@ -404,19 +423,19 @@ namespace clib {
                     {0.05,  0},
                     {0,     0.05}
                 };
-                make_polygon(2, vertices, {-0.2, -0.9})->f = 0.2;
-                make_polygon(2, vertices, {0.2, -0.9})->f = 0.2;
-                make_rect(2, 0.12, 0.2, {0, 0.8})->f = 0.2;
+                make_polygon(2, vertices, {-0.05, -0.09})->f = 0.2;
+                make_polygon(2, vertices, {0.05, -0.09})->f = 0.2;
+                make_rect(2, 0.12, 0.2, {0, 0.085})->f = 0.2;
             }
                 break;
             case 2: { // ¶ÑµþµÄ·½¿é
                 title = "[SCENE 2] Rectangle stack";
                 make_bound();
                 std::default_random_engine e((uint32_t) time(nullptr));
-                std::normal_distribution<decimal> dist{-0.1, 0.1};
-                for (auto i = 0; i < 10; ++i) {
+                std::normal_distribution<decimal> dist{-0.01, 0.01};
+                for (auto i = 0; i < 8; ++i) {
                     auto x = dist(e);
-                    auto body = make_rect(1, 0.5, 0.4, {x, -2.6 + 0.4 * i});
+                    auto body = make_rect(1, 0.1, 0.08, {x, -0.2 + 0.08 * i});
                     body->f = 0.2;
                 }
             }
@@ -424,44 +443,43 @@ namespace clib {
             case 3: { // ½ð×ÖËþ
                 title = "[SCENE 3] Rectangle pyramid";
                 make_bound();
-                //make_circle(10, 0.4, {-0.15, 2})->f = 0.2;
-                v2 x{-2.0, -2.4};
+                v2 x{-0.2, -0.24};
                 v2 y;
-                int n = 10;
+                int n = 8;
                 for (auto i = 0; i < n; ++i) {
                     y = x;
                     for (auto j = i; j < n; ++j) {
-                        make_rect(1, 0.4, 0.4, y)->f = 0.2;
-                        y += {0.41, 0.0};
+                        make_rect(1, 0.08, 0.08, y)->f = 0.2;
+                        y += {0.082, 0.0};
                     }
-                    x += {0.205, 0.41};
+                    x += {0.041, 0.082};
                 }
             }
                 break;
             case 4: { // Å£¶Ù°Ú
                 title = "[SCENE 4] Newton's cradle";
-                auto ground = make_rect(inf, 10, 0.1, {0, -3}, true);
-                auto box1 = make_rect(100, 0.5, 0.5, {5.75, 3});
+                auto ground = make_rect(inf, 2, 0.02, {0, -0.5}, true);
+                auto box1 = make_rect(100, 0.1, 0.1, {1.15, 0.6});
                 box1->CO = 0.99;
-                make_revolute_joint(ground, box1, {1.75, 3});
+                make_revolute_joint(ground, box1, {0.35, 0.6});
                 for (size_t i = 0; i < 6; ++i) {
-                    auto box2 = make_rect(100, 0.5, 0.5, {1.25 - i * 0.500001, -1});
+                    auto box2 = make_rect(100, 0.1, 0.1, {0.25 - i * 0.100001, -0.2});
                     box2->CO = 0.99;
-                    make_revolute_joint(ground, box2, {1.25 - i * 0.500001, 3});
+                    make_revolute_joint(ground, box2, {0.25 - i * 0.100001, 0.6});
                 }
             }
                 break;
             case 5: { // ½ÂÁ´
                 title = "[SCENE 5] Joints";
-                auto ground = make_rect(1, 10, 0.1, {0, -3}, true);
+                auto ground = make_rect(1, 2, 0.04, {0, -0.5}, true);
                 ground->f = 0.8;
                 const auto mass = 10.0;
-                const auto y = 3.0;
+                const auto y = 0.5;
                 auto last = ground;
-                for (int i = 0; i < 14; ++i) {
-                    auto box = make_rect(mass, 0.4, 0.1, {0.2 + 0.5 * i, y});
+                for (int i = 0; i < 12; ++i) {
+                    auto box = make_rect(mass, 0.08, 0.02, {0.04 + 0.1 * i, y});
                     box->f = 0.4;
-                    make_revolute_joint(last, box, {0.5 * i, y});
+                    make_revolute_joint(last, box, {0.1 * i, y});
                     last = box;
                 }
             }
@@ -469,25 +487,25 @@ namespace clib {
             case 6: { // ½ð×ÖËþ£¨Ô²Óë¶à±ßÐÎ£©
                 title = "[SCENE 6] Rectangle and circle pyramid";
                 make_bound();
-                v2 x{-2.0, -2.4};
+                v2 x{-0.4, -0.25};
                 v2 y;
-                int n = 10;
+                int n = 8;
                 std::default_random_engine e((uint32_t) time(nullptr));
-                std::uniform_real_distribution<decimal> dist{0.15, 0.2};
+                std::uniform_real_distribution<decimal> dist{0.03, 0.04};
                 std::uniform_int_distribution<int> dist2{0, 4};
                 for (auto i = 0; i < n; ++i) {
                     y = x;
                     for (auto j = i; j < n; ++j) {
                         switch (dist2(e)) {
                             case 1:
-                                make_rect(1, 0.4, 0.4, y)->f = 0.2;
+                                make_rect(1, 0.08, 0.08, y)->f = 0.2;
                                 break;
                             case 2: {
                                 static const auto sqrt_1_3 = 1 / std::sqrt(3);
                                 static const std::vector<v2> vertices = {
-                                    {0.2,  -0.2 * sqrt_1_3},
-                                    {0,    0.4 * sqrt_1_3},
-                                    {-0.2, -0.2 * sqrt_1_3}
+                                    {0.04,  -0.04 * sqrt_1_3},
+                                    {0,      0.04 * sqrt_1_3},
+                                    {-0.04, -0.04 * sqrt_1_3}
                                 };
                                 make_polygon(1, vertices, y)->f = 0.2;
                             }
@@ -495,12 +513,12 @@ namespace clib {
                             case 3: {
                                 static const auto sqrt_3 = std::sqrt(3);
                                 static const std::vector<v2> vertices = {
-                                    {0.2,  0},
-                                    {0.1,  0.1 * sqrt_3},
-                                    {-0.1, 0.1 * sqrt_3},
-                                    {-0.2, 0},
-                                    {-0.1, -0.1 * sqrt_3},
-                                    {0.1,  -0.1 * sqrt_3},
+                                    {0.04,  0},
+                                    {0.02,  0.02 * sqrt_3},
+                                    {-0.02, 0.02 * sqrt_3},
+                                    {-0.04, 0},
+                                    {-0.02, -0.02 * sqrt_3},
+                                    {0.02,  -0.02 * sqrt_3},
                                 };
                                 make_polygon(1, vertices, y)->f = 0.2;
                             }
@@ -509,9 +527,9 @@ namespace clib {
                                 make_circle(1, dist(e), y)->f = 0.2;
                                 break;
                         }
-                        y += {0.41, 0.0};
+                        y += {0.082, 0.0};
                     }
-                    x += {0.205, 0.41};
+                    x += {0.05125, 0.082};
                 }
             }
                 break;
@@ -541,6 +559,21 @@ namespace clib {
         scene(0);
     }
 
+    void c2d_world::toggle_pause()
+    {
+        paused = !paused;
+    }
+
+    void c2d_world::toggle_gravity()
+    {
+        gravity.y = gravity.y < 0 ? 0 : GRAVITY;
+        for (auto &body : bodies) {
+#if ENABLE_SLEEP
+            body->sleep = false;
+#endif
+        }
+    }
+
     size_t c2d_world::get_collision_size() const {
         return collisions.size();
     }
@@ -567,7 +600,7 @@ namespace clib {
         if (animation_id != id) {
             if (id == 1) {
                 animation_code =
-                        R"(map (\ `n `(box`(pos 0.5d 0.5d) `(size 0.4d 0.5d) `(mass 1d))) (range 0 10))";
+                        R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.08d 0.1d) `(mass 1d))) (range 0 10))";
                 vm.reset();
                 try {
                     parser = new cparser(animation_code);

@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include <cassert>
+#include <random>
 #include <array>
 #include <bitset>
 #include <vector>

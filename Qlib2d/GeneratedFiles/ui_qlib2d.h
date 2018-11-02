@@ -53,6 +53,7 @@ public:
         console = new QLineEdit(centralWidget);
         console->setObjectName(QStringLiteral("console"));
         console->setMaximumSize(QSize(16777215, 20));
+        console->setFocusPolicy(Qt::ClickFocus);
 
         verticalLayout->addWidget(console);
 
@@ -64,11 +65,13 @@ public:
         sizePolicy.setHeightForWidth(output->sizePolicy().hasHeightForWidth());
         output->setSizePolicy(sizePolicy);
         output->setMaximumSize(QSize(16777215, 60));
+        output->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout->addWidget(output);
 
         opengl2d = new Q2dImpl(centralWidget);
         opengl2d->setObjectName(QStringLiteral("opengl2d"));
+        opengl2d->setFocusPolicy(Qt::StrongFocus);
 
         verticalLayout->addWidget(opengl2d);
 
@@ -95,7 +98,7 @@ public:
 
     void retranslateUi(QMainWindow *Qlib2dClass)
     {
-        Qlib2dClass->setWindowTitle(QApplication::translate("Qlib2dClass", "Qlib2d", nullptr));
+        Qlib2dClass->setWindowTitle(QApplication::translate("Qlib2dClass", "Qlib2d - bajdcc", nullptr));
     } // retranslateUi
 
 };

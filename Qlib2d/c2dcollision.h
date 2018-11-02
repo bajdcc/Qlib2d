@@ -6,7 +6,6 @@
 #ifndef CLIB2D_C2DCOLLISION_H
 #define CLIB2D_C2DCOLLISION_H
 
-#include <vector>
 #include "c2dcontact.h"
 #include "c2dpolygon.h"
 #include "c2dcircle.h"

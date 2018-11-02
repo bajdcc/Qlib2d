@@ -21,12 +21,18 @@ public:
         Force,
         Velocity,
         Direction,
+        N,
+        Contact,
     };
 
     void paint_polygon(const std::vector<clib::v2> &v, PAINT_TYPE type);
     void paint_point(const clib::v2 &v, PAINT_TYPE type);
     void paint_bound(const clib::v2 &a, const clib::v2 &b, PAINT_TYPE type);
     void paint_line(const clib::v2 &a, const clib::v2 &b, PAINT_TYPE type);
+    void paint_line(const clib::v2 &a, const clib::v2 &b, const QColor &color);
+    void paint_circle(const clib::v2 &v, const qreal &r, PAINT_TYPE type);
+
+    clib::c2d_world & get_world();
 
 private:
     void select_pen(PAINT_TYPE type);
@@ -50,6 +56,8 @@ private:
     QPen force_line{ QColor(204, 51, 51) };
     QPen velocity_line{ QColor(0, 255, 0) };
     QPen direction_line{ QColor(51, 51, 51) };
+    QPen collision_force{ QColor(51, 127, 102) };
+    QPen collision_contact{ QColor(255, 51, 51) };
 
     clib::c2d_world world;
 };

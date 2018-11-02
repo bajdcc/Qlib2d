@@ -6,7 +6,6 @@
 #ifndef CLIB2D_C2DBODY_H
 #define CLIB2D_C2DBODY_H
 
-#include <memory>
 #include "c2d.h"
 #include "v2.h"
 #include "m2.h"

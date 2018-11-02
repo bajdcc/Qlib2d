@@ -6,8 +6,6 @@
 #ifndef CLIB2D_C2DWORLD_H
 #define CLIB2D_C2DWORLD_H
 
-#include <vector>
-#include <unordered_map>
 #include "c2dbody.h"
 #include "c2djoint.h"
 #include "c2dpolygon.h"
@@ -75,6 +73,9 @@ namespace clib {
         // ≥ı ºªØ
         void init();
 
+        void toggle_pause();
+        void toggle_gravity();
+
         size_t get_collision_size() const;
         size_t get_sleeping_size() const;
         void invert_gravity();
@@ -87,7 +88,7 @@ namespace clib {
         void run_animation();
 
     public:
-        static std::chrono::steady_clock::time_point last_clock;
+        static QTime last_clock;
         static decimal dt;
         static decimal dt_inv;
         static bool paused; //  «∑Ò‘›Õ£

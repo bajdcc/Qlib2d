@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "c2drevolute.h"
 #include "c2dworld.h"
+#include "q2dhelper.h"
 
 namespace clib {
 
@@ -52,7 +53,20 @@ namespace clib {
     }
 
     void c2d_revolute_joint::draw(Q2dHelper * helper) {
-        
+        auto centerA = a->world();
+        auto anchorA = world_anchor_a();
+        auto centerB = b->world();
+        auto anchorB = world_anchor_b();
+
+        auto str = std::min(std::log2(1 + p_acc.magnitude()), 10.0) * 0.08 * 255;
+        QColor color(255 - str, 255 * 0.2, 255 * 0.2 + str);
+        if (!a->statics) {
+            helper->paint_line(centerA, anchorA, color);
+        }
+        if (!b->statics) {
+            helper->paint_line(centerB, anchorB, color);
+        }
+        glEnd();
     }
 
     v2 c2d_revolute_joint::world_anchor_a() const {

@@ -15,7 +15,8 @@ public slots:
     void animate();
 
 protected:
-    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent * event) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent * event) Q_DECL_OVERRIDE;
 
 private:
     int elapsed{ 0 };

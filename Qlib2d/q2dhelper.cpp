@@ -65,6 +65,25 @@ void Q2dHelper::paint_line(const clib::v2 & a, const clib::v2 & b, PAINT_TYPE ty
     painter->drawLine(QLineF(trans(a), trans(b)));
 }
 
+void Q2dHelper::paint_line(const clib::v2 & a, const clib::v2 & b, const QColor & color)
+{
+    QPen pen(color);
+    painter->setPen(pen);
+    painter->drawLine(QLineF(trans(a), trans(b)));
+}
+
+void Q2dHelper::paint_circle(const clib::v2 & v, const qreal & r, PAINT_TYPE type)
+{
+    select_pen(type);
+    auto R = trans(clib::v2(r, 0)).x() - trans(clib::v2()).x();
+    painter->drawEllipse(trans(v), R, R);
+}
+
+clib::c2d_world & Q2dHelper::get_world()
+{
+    return world;
+}
+
 void Q2dHelper::select_pen(PAINT_TYPE type)
 {
     switch (type)
@@ -95,6 +114,12 @@ void Q2dHelper::select_pen(PAINT_TYPE type)
         break;
     case Q2dHelper::Direction:
         painter->setPen(direction_line);
+        break;
+    case Q2dHelper::N:
+        painter->setPen(collision_force);
+        break;
+    case Q2dHelper::Contact:
+        painter->setPen(collision_contact);
         break;
     default:
         break;

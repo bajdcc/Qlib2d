@@ -6,7 +6,6 @@
 #ifndef CLIB2D_V2_H
 #define CLIB2D_V2_H
 
-#include <cmath>
 #include "c2d.h"
 
 namespace clib {
