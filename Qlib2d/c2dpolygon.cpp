@@ -221,9 +221,30 @@ namespace clib {
 
     void c2d_polygon::draw(Q2dHelper * helper) {
         if (statics) { // 画静态物体
-            helper->paint_polygon(verticesWorld, true);
+            helper->paint_polygon(verticesWorld, Q2dHelper::PAINT_TYPE::Static);
             return;
         }
+#if ENABLE_SLEEP
+        if (sleep) { // 画休眠物体
+            helper->paint_polygon(verticesWorld, Q2dHelper::PAINT_TYPE::Sleep);
+            helper->paint_point(pos + center, Q2dHelper::PAINT_TYPE::Center);
+            return;
+        }
+#endif
+        helper->paint_bound(boundMin, boundMax, Q2dHelper::PAINT_TYPE::Bound);
+        if (collision > 0)
+            helper->paint_polygon(verticesWorld, Q2dHelper::PAINT_TYPE::Collision);
+        else
+            helper->paint_polygon(verticesWorld, Q2dHelper::PAINT_TYPE::Normal);
+        // 这里默认物体是中心对称的，重心就是中心，后面会计算重心
+        auto p = pos + center;
+        auto F = v2((Fa.x >= 0 ? 0.05 : -0.05) * std::log10(1 + std::abs(Fa.x) * 5),
+            (Fa.y >= 0 ? 0.05 : -0.05) * std::log10(1 + std::abs(Fa.y) * 5)); // 力向量
+        auto D = v2(R.x1 * 0.02, R.x2 * 0.02);
+        helper->paint_line(p, p + F, Q2dHelper::PAINT_TYPE::Force); // 力向量
+        helper->paint_line(p, p + V * 0.2, Q2dHelper::PAINT_TYPE::Velocity); // 速度向量
+        helper->paint_line(p, p + D, Q2dHelper::PAINT_TYPE::Direction); // 方向向量
+        helper->paint_point(p, Q2dHelper::PAINT_TYPE::Center);
     }
 
     v2 c2d_polygon::edge(size_t idx) const {

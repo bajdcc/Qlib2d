@@ -253,6 +253,7 @@ namespace clib {
 
         // ËøÖ¡
         if (dt > FRAME_SPAN) {
+            dt = qMin(dt, FRAME_SPAN * 2);
             dt_inv = 1.0 / dt;
             last_clock = now;
         }
@@ -399,13 +400,13 @@ namespace clib {
                 title = "[SCENE 1] One rectangle and two triangles";
                 make_bound();
                 std::vector<v2> vertices = {
-                    {-0.5, 0},
-                    {0.5,  0},
-                    {0,    0.5}
+                    {-0.05, 0},
+                    {0.05,  0},
+                    {0,     0.05}
                 };
-                make_polygon(2, vertices, {-0.5, -2.9})->f = 0.2;
-                make_polygon(2, vertices, {0.5, -2.9})->f = 0.2;
-                make_rect(2, 1.2, 2, {0, 1.5})->f = 0.2;
+                make_polygon(2, vertices, {-0.2, -0.9})->f = 0.2;
+                make_polygon(2, vertices, {0.2, -0.9})->f = 0.2;
+                make_rect(2, 0.12, 0.2, {0, 0.8})->f = 0.2;
             }
                 break;
             case 2: { // ¶ÑµþµÄ·½¿é
@@ -523,14 +524,14 @@ namespace clib {
             default: {
                 title = "[SCENE DEFAULT] Rectangle, triangle and circle";
                 make_bound();
-                make_rect(1, 1, 1, {0, 0})->f = 0.2;
-                make_circle(1, 0.5, {1, 0})->f = 0.2;
+                make_rect(1, 0.1, 0.1, {0, 0})->f = 0.2;
+                make_circle(1, 0.05, {0.1, 0})->f = 0.2;
                 static std::vector<v2> vertices = {
-                    {0, 0},
-                    {1, 0},
-                    {0, 1}
+                    {0.0, 0.0},
+                    {0.1, 0.0},
+                    {0.0, 0.1}
                 };
-                make_polygon(1, vertices, {0, 1})->f = 0.2;
+                make_polygon(1, vertices, {0, 0.1})->f = 0.2;
             }
                 break;
         }

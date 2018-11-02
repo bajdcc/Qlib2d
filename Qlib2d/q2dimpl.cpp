@@ -5,7 +5,9 @@
 
 Q2dImpl::Q2dImpl(QWidget *parent) : QOpenGLWidget(parent)
 {
-
+    auto timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timer->start(PAINT_SPAN);
 }
 
 
