@@ -67,6 +67,7 @@ namespace clib {
         v2 Fa; // 受力（累计）
         decimal M{0}; // 力矩
         decimal CO{COLL_CO}; // 弹性碰撞系数
+        QString text;
     };
 }
 

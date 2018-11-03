@@ -91,6 +91,19 @@ void Q2dHelper::paint_text(int x, int y, const QString & str, PAINT_TYPE type)
     painter->drawText(x, y, str);
 }
 
+void Q2dHelper::paint_text(const clib::v2 & v, const qreal &angle, const QString & str, PAINT_TYPE type)
+{
+    painter->setPen(font);
+    select(type);
+    auto m = painter->fontMetrics();
+    auto width = m.width(str);
+    auto height = m.height();
+    painter->translate(world2screen(v));
+    painter->rotate(-180.0 * angle / M_PI);
+    painter->drawText(-width / 2, height / 2, str);
+    painter->resetMatrix();
+}
+
 clib::c2d_world & Q2dHelper::get_world()
 {
     return world;

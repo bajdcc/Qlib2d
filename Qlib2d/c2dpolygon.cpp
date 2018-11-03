@@ -245,6 +245,8 @@ namespace clib {
         helper->paint_line(p, p + V * 0.2, Q2dHelper::PAINT_TYPE::Velocity); // 速度向量
         helper->paint_line(p, p + D, Q2dHelper::PAINT_TYPE::Direction); // 方向向量
         helper->paint_point(p, Q2dHelper::PAINT_TYPE::Center);
+        if (!text.isEmpty())
+            helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::NormalText);
     }
 
     v2 c2d_polygon::edge(size_t idx) const {

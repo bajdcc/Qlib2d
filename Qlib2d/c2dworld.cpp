@@ -376,14 +376,14 @@ namespace clib {
         helper->paint_text(w / 2 - 200, (QApplication::desktop()->width() < 1920) ? 30 : 40, title, Q2dHelper::PAINT_TYPE::TitleText);
 
         if (animation_id != 0)
-            helper->paint_text(20, 80, QString::fromLocal8Bit("[Now] %1").arg(animation_code), Q2dHelper::PAINT_TYPE::CodeText);
+            helper->paint_text(20, 80, QString("[Now] %1").arg(animation_code), Q2dHelper::PAINT_TYPE::CodeText);
         if (!animation_queue.empty())
         {
             auto y = 90;
             auto i = 1;
             QString str;
             foreach(str, animation_queue) {
-                helper->paint_text(20, y += 10, QString::fromLocal8Bit("[Queue #%1] %2").arg(i++).arg(str), Q2dHelper::PAINT_TYPE::CodeText);
+                helper->paint_text(20, y += 10, QString("[Queue #%1] %2").arg(i++).arg(str), Q2dHelper::PAINT_TYPE::CodeText);
             }
         }
     }
@@ -660,9 +660,9 @@ namespace clib {
             if (id == 1 || id == 2) {
                 if (id == 1) {
                     animation_code = QString(R"(+ __author__ " " __project__)");
-                    animation_queue.enqueue(QString(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.04d 0.05d) `(mass 1d))) (range 0 10))"));
-                    animation_queue.enqueue(QString(R"(map (\ `n `(circle`(pos 0.0d 0.0d) `(r 0.025d) `(mass 1d))) (range 0 5))"));
-                    animation_queue.enqueue(QString(R"(map (\ `n `(tri`(pos 0.0d 0.0d) `(edge 0.04d 0.04d) `(angle 60d) `(mass 1d))) (range 0 5))"));
+                    animation_queue.enqueue(QString::fromLocal8Bit(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.04d 0.05d) `(mass 1d) `(text "¾Ø"))) (range 0 10))"));
+                    animation_queue.enqueue(QString::fromLocal8Bit(R"(map (\ `n `(circle`(pos 0.0d 0.0d) `(r 0.025d) `(mass 1d) `(text "Ô²"))) (range 0 5))"));
+                    animation_queue.enqueue(QString::fromLocal8Bit(R"(map (\ `n `(tri`(pos 0.0d 0.0d) `(edge 0.04d 0.04d) `(angle 60d) `(mass 1d) `(text "½Ç"))) (range 0 5))"));
                 }
                 emit helper->output(QString("Running lisp...\n%1").arg(animation_code), 0);
                 // vm.reset();

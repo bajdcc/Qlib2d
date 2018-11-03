@@ -40,6 +40,7 @@ public:
     void paint_line(const clib::v2 &a, const clib::v2 &b, const QColor &color);
     void paint_circle(const clib::v2 &v, const qreal &r, PAINT_TYPE type);
     void paint_text(int x, int y, const QString &str, PAINT_TYPE type);
+    void paint_text(const clib::v2 &v, const qreal &angle, const QString &str, PAINT_TYPE type);
 
     clib::c2d_world & get_world();
     QSize get_size();

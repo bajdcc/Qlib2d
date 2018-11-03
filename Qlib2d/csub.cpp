@@ -885,7 +885,8 @@ namespace clib {
         auto mass = 1.0;
         auto w = 0.0;
         auto h = 0.0;
-        auto pos = v2();
+        v2 pos;
+        QString s;
         while (i) {
             if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
                 auto op = i->val._v.child;
@@ -902,10 +903,14 @@ namespace clib {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
+                else if (strstr(str, "text") && count == 2 && op->next->type == ast_string) {
+                    s = QString::fromLocal8Bit(op->next->val._string);
+                }
             }
             i = i->next;
         }
-        vm->get_world()->make_rect(mass, w, h, pos);
+        auto obj = vm->get_world()->make_rect(mass, w, h, pos);
+        obj->text = s;
 #if LISP_DEBUG
         qDebug("[DEBUG] Create box by lisp.\n");
 #endif
@@ -918,7 +923,8 @@ namespace clib {
         auto i = VM_OP(val);
         auto mass = 1.0;
         auto r = 0.0;
-        auto pos = v2();
+        v2 pos;
+        QString s;
         while (i) {
             if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
                 auto op = i->val._v.child;
@@ -934,10 +940,14 @@ namespace clib {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
+                else if (strstr(str, "text") && count == 2 && op->next->type == ast_string) {
+                    s = QString::fromLocal8Bit(op->next->val._string);
+                }
             }
             i = i->next;
         }
-        vm->get_world()->make_circle(mass, r, pos);
+        auto obj = vm->get_world()->make_circle(mass, r, pos);
+        obj->text = s;
 #if LISP_DEBUG
         qDebug("[DEBUG] Create box by lisp.\n");
 #endif
@@ -950,9 +960,10 @@ namespace clib {
         auto i = VM_OP(val);
         auto mass = 1.0;
         auto angle = 0.0;
-        auto pos = v2();
+        v2 pos;
         auto a = 0.0;
         auto b = 0.0;
+        QString s;
         std::vector<v2> vertices = {
             {0, 0},
             {0, 0},
@@ -977,6 +988,9 @@ namespace clib {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
+                else if (strstr(str, "text") && count == 2 && op->next->type == ast_string) {
+                    s = QString::fromLocal8Bit(op->next->val._string);
+                }
             }
             i = i->next;
         }
@@ -984,7 +998,8 @@ namespace clib {
         vertices[1].x = a;
         vertices[2].x = b * std::cos(angle);
         vertices[2].y = b * std::sin(angle);
-        vm->get_world()->make_polygon(mass, vertices, pos);
+        auto obj = vm->get_world()->make_polygon(mass, vertices, pos);
+        obj->text = s;
 #if LISP_DEBUG
         qDebug("[DEBUG] Create box by lisp.\n");
 #endif
