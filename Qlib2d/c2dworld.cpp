@@ -663,7 +663,7 @@ namespace clib {
                     animation_queue.enqueue(QString(R"(map (\ `n `(tri`(pos 0.0d 0.0d) `(edge 0.04d 0.04d) `(angle 60d) `(mass 1d))) (range 0 5))"));
                 }
                 emit helper->output(QString("Running lisp...\n%1").arg(animation_code), 0);
-                vm.reset();
+                // vm.reset();
                 try {
                     parser = std::make_unique<cparser>(animation_code.toStdString());
                     auto node = parser->parse();
