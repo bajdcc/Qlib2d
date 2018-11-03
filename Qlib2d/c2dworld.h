@@ -81,6 +81,8 @@ namespace clib {
         size_t get_collision_size() const;
         size_t get_sleeping_size() const;
         void invert_gravity();
+        void set_gravity(const v2 & v);
+        void set_cycle(int cycle);
 
         void set_helper(Q2dHelper * helper);
 
@@ -88,6 +90,8 @@ namespace clib {
         void start_animation(uint32_t id);
         void stop_animation();
         void run_animation();
+
+        static QString scene_7();
 
     public:
         static QTime last_clock;
@@ -104,6 +108,7 @@ namespace clib {
         std::unique_ptr<cparser> parser;
 
         Q2dHelper *helper;
+        int cycle{ LISP_CYCLE };
 
         bool mouse_drag{false};
         v2 global_drag; //  Û±ÍÕœ∂Ø

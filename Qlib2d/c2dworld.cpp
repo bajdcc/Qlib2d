@@ -184,24 +184,30 @@ namespace clib {
         v2 ptA1, ptA2;
         const auto typeA = c.bodyA->type();
         const auto typeB = c.bodyB->type();
-        if (!c.bodyA->statics) {
+        auto showA = false;
+        auto showB = false;
+        if (!c.bodyA->statics && c.bodyA->text.isEmpty()) {
             if (typeA == C2D_POLYGON) {
+                showA = true;
                 auto bodyA = dynamic_cast<c2d_polygon *>(c.bodyA);
                 ptA1 = bodyA->vertex(c.A.polygon.idx);
                 ptA2 = bodyA->vertex(c.A.polygon.idx + 1);
                 helper->paint_line(ptA1, ptA2, Q2dHelper::PAINT_TYPE::N);
             }
         }
-        if (!c.bodyB->statics) {
+        if (!c.bodyB->statics && c.bodyB->text.isEmpty()) {
             if (typeB == C2D_POLYGON) {
+                showB = true;
                 auto bodyB = dynamic_cast<c2d_polygon *>(c.bodyB);
                 auto ptB1 = bodyB->vertex(c.B.polygon.idx);
                 auto ptB2 = bodyB->vertex(c.B.polygon.idx + 1);
                 helper->paint_line(ptB1, ptB2, Q2dHelper::PAINT_TYPE::N);
             }
         }
-        for (auto &contact : c.contacts) {
-            helper->paint_point(contact.pos, Q2dHelper::PAINT_TYPE::Contact);
+        if (showA && showB) {
+            for (auto &contact : c.contacts) {
+                helper->paint_point(contact.pos, Q2dHelper::PAINT_TYPE::Contact);
+            }
         }
     }
 
@@ -650,6 +656,16 @@ namespace clib {
         }
     }
 
+    void clib::c2d_world::set_gravity(const v2 & v)
+    {
+        gravity = v;
+    }
+
+    void clib::c2d_world::set_cycle(int cycle)
+    {
+        this->cycle = cycle;
+    }
+
     void c2d_world::set_helper(Q2dHelper * helper)
     {
         this->helper = helper;
@@ -660,9 +676,12 @@ namespace clib {
             if (id == 1 || id == 2) {
                 if (id == 1) {
                     animation_code = QString(R"(+ __author__ " " __project__)");
-                    animation_queue.enqueue(QString::fromLocal8Bit(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.04d 0.05d) `(mass 1d) `(text "¾Ø"))) (range 0 10))"));
-                    animation_queue.enqueue(QString::fromLocal8Bit(R"(map (\ `n `(circle`(pos 0.0d 0.0d) `(r 0.025d) `(mass 1d) `(text "Ô²"))) (range 0 5))"));
-                    animation_queue.enqueue(QString::fromLocal8Bit(R"(map (\ `n `(tri`(pos 0.0d 0.0d) `(edge 0.04d 0.04d) `(angle 60d) `(mass 1d) `(text "½Ç"))) (range 0 5))"));
+                    auto code = scene_7();
+                    QString c;
+                    foreach(c, code.split("\n")) {
+                        if (!c.isEmpty())
+                            animation_queue.enqueue(c);
+                    }
                 }
                 emit helper->output(QString("Running lisp...\n%1").arg(animation_code), 0);
                 // vm.reset();
@@ -695,7 +714,7 @@ namespace clib {
 
     void c2d_world::run_animation() {
         try {
-            auto val = vm.run(LISP_CYCLE);
+            auto val = vm.run(cycle);
             if (val != nullptr) {
                 std::stringstream ss;
                 clib::cvm::print(val, ss);

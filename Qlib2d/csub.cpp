@@ -102,6 +102,7 @@ namespace clib {
         ADD_BUILTIN(circle);
         ADD_BUILTIN(tri);
         ADD_BUILTIN(scene);
+        ADD_BUILTIN(conf);
 #undef ADD_BUILTIN
     }
 
@@ -949,7 +950,7 @@ namespace clib {
         auto obj = vm->get_world()->make_circle(mass, r, pos);
         obj->text = s;
 #if LISP_DEBUG
-        qDebug("[DEBUG] Create box by lisp.\n");
+        qDebug("[DEBUG] Create circle by lisp.\n");
 #endif
         VM_RET(VM_NIL);
     }
@@ -1001,7 +1002,7 @@ namespace clib {
         auto obj = vm->get_world()->make_polygon(mass, vertices, pos);
         obj->text = s;
 #if LISP_DEBUG
-        qDebug("[DEBUG] Create box by lisp.\n");
+        qDebug("[DEBUG] Create triangle by lisp.\n");
 #endif
         VM_RET(VM_NIL);
     }
@@ -1017,6 +1018,42 @@ namespace clib {
             auto i = op->val._int;
             vm->get_world()->scene(i);
         }
+        VM_RET(VM_NIL);
+    }
+
+    status_t builtins::conf(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        auto i = VM_OP(val);
+        while (i) {
+            if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
+                auto op = i->val._v.child;
+                auto count = i->val._v.count;
+                auto str = op->val._string;
+                if (strstr(str, "gravity") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    auto x = op->next->val._double;
+                    auto y = op->next->next->val._double;
+                    vm->get_world()->set_gravity(v2(x, y));
+                }
+                else if (strstr(str, "cycle") && count == 2 && op->next->type == ast_int) {
+                    auto cycle = op->next->val._int;
+                    vm->get_world()->set_cycle(cycle);
+                }
+                else if (strstr(str, "force") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    auto x = op->next->val._double;
+                    auto y = op->next->next->val._double;
+                    vm->get_world()->move(v2(x, y));
+                }
+                else if (strstr(str, "rotate") && count == 2 && op->next->type == ast_double) {
+                    auto angle = M_PI * op->next->val._double / 180.0;
+                    vm->get_world()->rotate(angle);
+                }
+            }
+            i = i->next;
+        }
+#if LISP_DEBUG
+        qDebug("[DEBUG] Create box by lisp.\n");
+#endif
         VM_RET(VM_NIL);
     }
 }

@@ -129,6 +129,7 @@
     <ClCompile Include="c2djoint.cpp" />
     <ClCompile Include="c2dpolygon.cpp" />
     <ClCompile Include="c2drevolute.cpp" />
+    <ClCompile Include="c2dscene.cpp" />
     <ClCompile Include="c2dworld.cpp" />
     <ClCompile Include="cast.cpp" />
     <ClCompile Include="cexception.cpp" />

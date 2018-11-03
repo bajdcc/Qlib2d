@@ -53,6 +53,7 @@ namespace clib {
         static status_t tri(cvm *vm, cframe *frame);
 
         static status_t scene(cvm *vm, cframe *frame);
+        static status_t conf(cvm *vm, cframe *frame);
     };
 }
 

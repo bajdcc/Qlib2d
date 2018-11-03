@@ -126,6 +126,11 @@ namespace clib {
             helper->paint_circle(pos, r.value, Q2dHelper::PAINT_TYPE::Static);
             return;
         }
+        auto &p = pos;
+        if (!text.isEmpty()) {
+            helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::NormalText);
+            return;
+        }
 #if ENABLE_SLEEP
         if (sleep) { // 画休眠物体
             helper->paint_circle(pos, r.value, Q2dHelper::PAINT_TYPE::Sleep);
@@ -141,7 +146,6 @@ namespace clib {
         else
             helper->paint_circle(pos, r.value, Q2dHelper::PAINT_TYPE::Normal);
         // 这里默认物体是中心对称的，重心就是中心，后面会计算重心
-        auto &p = pos;
         auto F = v2((Fa.x >= 0 ? 0.05 : -0.05) * std::log10(1 + std::abs(Fa.x) * 5),
             (Fa.y >= 0 ? 0.05 : -0.05) * std::log10(1 + std::abs(Fa.y) * 5)); // 力向量
         auto D = v2(std::cos(angle) * 0.02, std::sin(angle) * 0.02);
@@ -149,7 +153,5 @@ namespace clib {
         helper->paint_line(p, p + V * 0.2, Q2dHelper::PAINT_TYPE::Velocity); // 速度向量
         helper->paint_line(p, p + D, Q2dHelper::PAINT_TYPE::Direction); // 方向向量
         helper->paint_point(p, Q2dHelper::PAINT_TYPE::Center);
-        if (!text.isEmpty())
-            helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::NormalText);
     }
 }

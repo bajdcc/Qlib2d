@@ -99,6 +99,9 @@
     <ClCompile Include="cexception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="c2dscene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

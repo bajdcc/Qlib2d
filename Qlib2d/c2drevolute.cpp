@@ -60,10 +60,10 @@ namespace clib {
 
         auto str = std::min(std::log2(1 + p_acc.magnitude()), 10.0) * 0.08 * 255;
         QColor color(255 - str, 255 * 0.2, 255 * 0.2 + str);
-        if (!a->statics) {
+        if (!a->statics && a->text.isEmpty()) {
             helper->paint_line(centerA, anchorA, color);
         }
-        if (!b->statics) {
+        if (!b->statics && b->text.isEmpty()) {
             helper->paint_line(centerB, anchorB, color);
         }
         glEnd();
