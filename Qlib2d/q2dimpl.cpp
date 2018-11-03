@@ -71,3 +71,24 @@ void Q2dImpl::keyPressEvent(QKeyEvent * event)
         break;
     }
 }
+
+void Q2dImpl::mousePressEvent(QMouseEvent * event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        helper.get_world().mouse(Q2dHelper::screen2world(event->localPos()), true);
+    }
+}
+
+void Q2dImpl::mouseReleaseEvent(QMouseEvent * event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        helper.get_world().mouse(Q2dHelper::screen2world(event->localPos()), false);
+    }
+}
+
+void Q2dImpl::mouseMoveEvent(QMouseEvent * event)
+{
+    helper.get_world().motion(Q2dHelper::screen2world(event->localPos()));
+}

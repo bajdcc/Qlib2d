@@ -99,6 +99,7 @@ namespace clib {
     private:
         uint32_t animation_id{0};
         QString animation_code;
+        QQueue<QString> animation_queue;
         cvm vm;
         std::unique_ptr<cparser> parser;
 

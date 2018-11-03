@@ -94,6 +94,8 @@ namespace clib {
         ADD_BUILTIN(str);
         ADD_BUILTIN(print);
         ADD_BUILTIN(box);
+        ADD_BUILTIN(circle);
+        ADD_BUILTIN(tri);
 #undef ADD_BUILTIN
     }
 
@@ -897,7 +899,86 @@ namespace clib {
             }
             i = i->next;
         }
-        auto box = vm->get_world()->make_rect(mass, w, h, pos);
+        vm->get_world()->make_rect(mass, w, h, pos);
+#if LISP_DEBUG
+        printf("[DEBUG] Create box by lisp.\n");
+#endif
+        VM_RET(VM_NIL);
+    }
+
+    status_t builtins::circle(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        auto i = VM_OP(val);
+        auto mass = 1.0;
+        auto r = 0.0;
+        auto pos = v2();
+        while (i) {
+            if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
+                auto op = i->val._v.child;
+                auto count = i->val._v.count;
+                auto str = op->val._string;
+                if (strstr(str, "mass") && count == 2 && op->next->type == ast_double) {
+                    mass = op->next->val._double;
+                }
+                else if (strstr(str, "r") && count == 2 && op->next->type == ast_double) {
+                    r = op->next->val._double;
+                }
+                else if (strstr(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    pos.x = op->next->val._double;
+                    pos.y = op->next->next->val._double;
+                }
+            }
+            i = i->next;
+        }
+        vm->get_world()->make_circle(mass, r, pos);
+#if LISP_DEBUG
+        printf("[DEBUG] Create box by lisp.\n");
+#endif
+        VM_RET(VM_NIL);
+    }
+
+    status_t builtins::tri(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        auto i = VM_OP(val);
+        auto mass = 1.0;
+        auto angle = 0.0;
+        auto pos = v2();
+        auto a = 0.0;
+        auto b = 0.0;
+        std::vector<v2> vertices = {
+            {0, 0},
+            {0, 0},
+            {0, 0}
+        };
+        while (i) {
+            if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
+                auto op = i->val._v.child;
+                auto count = i->val._v.count;
+                auto str = op->val._string;
+                if (strstr(str, "mass") && count == 2 && op->next->type == ast_double) {
+                    mass = op->next->val._double;
+                }
+                else if (strstr(str, "angle") && count == 2 && op->next->type == ast_double) {
+                    angle = op->next->val._double;
+                }
+                else if (strstr(str, "edge") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    a = op->next->val._double;
+                    b = op->next->next->val._double;
+                }
+                else if (strstr(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    pos.x = op->next->val._double;
+                    pos.y = op->next->next->val._double;
+                }
+            }
+            i = i->next;
+        }
+        angle = angle / 180.0 * M_PI;
+        vertices[1].x = a;
+        vertices[2].x = b * std::cos(angle);
+        vertices[2].y = b * std::sin(angle);
+        vm->get_world()->make_polygon(mass, vertices, pos);
 #if LISP_DEBUG
         printf("[DEBUG] Create box by lisp.\n");
 #endif

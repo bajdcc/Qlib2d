@@ -21,5 +21,5 @@ private:
 private slots:
     void execLispCommand();
     void escape();
-    void output(QString &);
+    void output(QString &, int);
 };

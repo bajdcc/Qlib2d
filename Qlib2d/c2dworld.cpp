@@ -344,19 +344,47 @@ namespace clib {
         }
 
         if (mouse_drag) {
+            auto dist = global_drag + global_drag_offset;
+            helper->paint_line(global_drag, dist, Q2dHelper::PAINT_TYPE::DragLine);
+            helper->paint_point(global_drag, Q2dHelper::PAINT_TYPE::DragPoint);
+            helper->paint_point(dist, Q2dHelper::PAINT_TYPE::DragPoint);
+            glLineWidth(1.0f);
+            glColor3f(0.6f, 0.6f, 0.6f);
+            glBegin(GL_LINES);
+            glVertex2d(global_drag.x, global_drag.y);
+            glVertex2d(global_drag.x + global_drag_offset.x, global_drag.y + global_drag_offset.y);
+            glEnd();
+            glColor3f(0.9f, 0.7f, 0.4f);
+            glPointSize(4.0f);
+            glBegin(GL_POINTS);
+            glVertex2d(global_drag.x, global_drag.y);
+            glVertex2d(global_drag.x + global_drag_offset.x, global_drag.y + global_drag_offset.y);
+            glEnd();
         }
 
         auto size = helper->get_size();
         auto w = size.width();
         auto h = size.height();
-        helper->paint_text(10, 20, "Qlib2d @bajdcc");
-        helper->paint_text(w - 110, 20, QString().sprintf("FPS: %.1f", dt_inv));
-        helper->paint_text(10, h - 20, "#c5p2");
+        helper->paint_text(10, 20, "Qlib2d @bajdcc", Q2dHelper::PAINT_TYPE::NormalText);
+        helper->paint_text(w - 110, 20, QString().sprintf("FPS: %.1f", dt_inv), Q2dHelper::PAINT_TYPE::NormalText);
+        helper->paint_text(10, h - 20, "#c5p2", Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(w - 200, h - 20, QString::fromLocal8Bit("Åö×²: %1, ÐÝÃß: %2")
-            .arg(collisions.size()).arg(sleep_bodies()));
+            .arg(collisions.size()).arg(sleep_bodies()), Q2dHelper::PAINT_TYPE::NormalText);
         if (paused)
-            helper->paint_text(w / 2 - 30, 20, "ÔÝÍ£");
-        helper->paint_text(w / 2 - 200, (QApplication::desktop()->width() < 1920) ? 30 : 40, title);
+            helper->paint_text(w / 2 - 30, 20, "ÔÝÍ£", Q2dHelper::PAINT_TYPE::NormalText);
+        helper->paint_text(w / 2 - 200, (QApplication::desktop()->width() < 1920) ? 30 : 40, title, Q2dHelper::PAINT_TYPE::TitleText);
+
+        if (animation_id != 0)
+            helper->paint_text(20, 80, QString::fromLocal8Bit("[Now] %1").arg(animation_code), Q2dHelper::PAINT_TYPE::CodeText);
+        if (!animation_queue.empty())
+        {
+            auto y = 90;
+            auto i = 1;
+            QString str;
+            foreach(str, animation_queue) {
+                helper->paint_text(20, y += 10, QString::fromLocal8Bit("[Queue #%1] %2").arg(i++).arg(str), Q2dHelper::PAINT_TYPE::CodeText);
+            }
+        }
     }
 
     void c2d_world::move(const v2 &v) {
@@ -485,12 +513,12 @@ namespace clib {
                 break;
             case 5: { // ½ÂÁ´
                 title = QString::fromLocal8Bit("¡¾³¡¾°Îå¡¿½ÂÁ´");
-                auto ground = make_rect(1, 2, 0.04, {0, -0.5}, true);
+                auto ground = make_rect(1, 2, 0.04, {0, -0.45}, true);
                 ground->f = 0.8;
                 const auto mass = 10.0;
-                const auto y = 0.5;
+                const auto y = 0.45;
                 auto last = ground;
-                for (int i = 0; i < 12; ++i) {
+                for (int i = 0; i < 10; ++i) {
                     auto box = make_rect(mass, 0.08, 0.02, {0.04 + 0.1 * i, y});
                     box->f = 0.4;
                     make_revolute_joint(last, box, {0.1 * i, y});
@@ -576,10 +604,15 @@ namespace clib {
 
     void c2d_world::exec(QString & str)
     {
-        if (animation_id == 0) {
+        if (animation_id == 0)
+        {
             animation_code = str;
             start_animation(2);
             str.clear();
+        }
+        else
+        {
+            animation_queue.enqueue(str);
         }
     }
 
@@ -623,9 +656,13 @@ namespace clib {
     void c2d_world::start_animation(uint32_t id) {
         if (animation_id != id) {
             if (id == 1 || id == 2) {
-                if (id == 1)
-                    animation_code =
-                        QString(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.08d 0.1d) `(mass 1d))) (range 0 10))");
+                if (id == 1) {
+                    animation_code = QString(R"(quote (hello world))");
+                    animation_queue.enqueue(QString(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.04d 0.05d) `(mass 1d))) (range 0 10))"));
+                    animation_queue.enqueue(QString(R"(map (\ `n `(circle`(pos 0.0d 0.0d) `(r 0.025d) `(mass 1d))) (range 0 5))"));
+                    animation_queue.enqueue(QString(R"(map (\ `n `(tri`(pos 0.0d 0.0d) `(edge 0.04d 0.04d) `(angle 60d) `(mass 1d))) (range 0 5))"));
+                }
+                emit helper->output(QString("Running lisp...\n%1").arg(animation_code), 0);
                 vm.reset();
                 try {
                     parser = std::make_unique<cparser>(animation_code.toStdString());
@@ -634,7 +671,7 @@ namespace clib {
                 } catch (const std::exception &e) {
                     printf("RUNTIME ERROR: %s\n", e.what());
                     parser.reset(nullptr);
-                    emit helper->output(QString("Error"));
+                    emit helper->output(QString("Error"), 0);
                     return;
                 }
                 vm.save();
@@ -647,6 +684,10 @@ namespace clib {
         if (animation_id != 0) {
             parser.reset(nullptr);
             animation_id = 0;
+            if (!animation_queue.empty()) {
+                animation_code = animation_queue.dequeue();
+                start_animation(2);
+            }
         }
     }
 
@@ -656,7 +697,7 @@ namespace clib {
             if (val != nullptr) {
                 std::stringstream ss;
                 clib::cvm::print(val, ss);
-                emit helper->output(QString::fromStdString(ss.str()));
+                emit helper->output(QString::fromStdString(ss.str()), 0);
                 vm.gc();
                 stop_animation();
             }
@@ -665,7 +706,7 @@ namespace clib {
             vm.restore();
             vm.gc();
             stop_animation();
-            emit helper->output(QString("Error"));
+            emit helper->output(QString("Error"), 0);
         }
     }
 }
