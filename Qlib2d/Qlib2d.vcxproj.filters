@@ -96,6 +96,9 @@
     <ClCompile Include="v2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cexception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -156,6 +159,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="v2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cexception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

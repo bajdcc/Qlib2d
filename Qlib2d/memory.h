@@ -349,7 +349,7 @@ namespace clib {
 
         void dump(std::ostream &os) {
             auto ptr = block_head;
-            printf("[DEBUG] MEM   | Available: %zu\n", block_available_size);
+            qDebug("[DEBUG] MEM   | Available: %zu\n", block_available_size);
             if (ptr->next == ptr) {
                 if (block_get_flag(ptr, BLOCK_USING)) {
                     dump_block(ptr, os);
@@ -368,7 +368,7 @@ namespace clib {
 
     private:
         static void dump_block(block *blk, std::ostream &os) {
-            printf("[DEBUG] MEM   | [%p-%p] Size: %8lu, State: %s\n", blk, blk + blk->size, blk->size, block_get_flag(blk, BLOCK_USING) ? "Using" : "Free");
+            qDebug("[DEBUG] MEM   | [%p-%p] Size: %8lu, State: %s\n", blk, blk + blk->size, blk->size, block_get_flag(blk, BLOCK_USING) ? "Using" : "Free");
         }
     };
 

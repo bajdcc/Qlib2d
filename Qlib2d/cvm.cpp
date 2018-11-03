@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include "cexception.h"
 #include "cvm.h"
 #include "cast.h"
 #include "csub.h"
@@ -21,7 +22,7 @@ namespace clib {
         global_env->val._env.parent = nullptr;
         mem.push_root(global_env);
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s\n", global_env, cast::ast_str(global_env->type).c_str());
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s\n", global_env, cast::ast_str(global_env->type).c_str());
 #endif
         builtin_init();
         mem.pop_root();
@@ -121,7 +122,7 @@ namespace clib {
                     auto v = val_obj(type);
                     mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-                    printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, count: %d\n", v, cast::ast_str(type).c_str(),
+                    qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, count: %d\n", v, cast::ast_str(type).c_str(),
                            cast::children_size(node));
 #endif
                     v->val._v.child = nullptr;
@@ -152,7 +153,7 @@ namespace clib {
                     auto v = val_obj(type);
                     mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-                    printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, count: %d\n", node, cast::ast_str(type).c_str(),
+                    qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, count: %d\n", node, cast::ast_str(type).c_str(),
                            cast::children_size(node));
 #endif
                     v->val._v.child = nullptr;
@@ -173,7 +174,7 @@ namespace clib {
             case ast_string: {
                 auto v = val_str(type, node->data._string);
 #if SHOW_ALLOCATE_NODE
-                printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, val: %s\n", v, cast::ast_str(type).c_str(),
+                qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, val: %s\n", v, cast::ast_str(type).c_str(),
                        v->val._string);
 #endif
                 return v;
@@ -181,7 +182,7 @@ namespace clib {
             case ast_literal: {
                 auto v = val_str(type, node->data._string);
 #if SHOW_ALLOCATE_NODE
-                printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, val: %s\n", v, cast::ast_str(type).c_str(),
+                qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, val: %s\n", v, cast::ast_str(type).c_str(),
                        v->val._string);
 #endif
                 return v;
@@ -191,9 +192,11 @@ namespace clib {
             case ast_##t: { \
                 auto v = val_obj(type); \
                 v->val._##t = node->data._##t; \
-                printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, val: ", v, cast::ast_str(type).c_str()); \
-                print(v, std::cout); \
-                std::cout << std::endl; \
+                qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, val: ", v, cast::ast_str(type).c_str()); \
+                std::stringstream ss; \
+                print(v, ss); \
+                qDebug() << QString::fromLocal8Bit(ss.str().c_str()); \
+                qDebug("\n"); \
                 return v; }
 #else
 #define DEFINE_VAL(t) \
@@ -261,8 +264,7 @@ namespace clib {
     }
 
     void cvm::error(const string_t &info) {
-        printf("COMPILER ERROR: %s\n", info.c_str());
-        throw std::exception();
+        throw cexception(QString("COMPILER ERROR: %1\n").arg(QString::fromLocal8Bit(info.c_str())));
     }
 
     void cvm::print(cval *val, std::ostream &os) {
@@ -366,7 +368,7 @@ namespace clib {
 #endif
         mem.gc();
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] MEM   | Alive objects: %lu\n", mem.count());
+        qDebug("[DEBUG] MEM   | Alive objects: %lu\n", mem.count());
 #endif
     }
 
@@ -425,9 +427,11 @@ namespace clib {
                 break;
         }
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] COPY  | addr: 0x%p, node: %-10s, val: ", new_val, cast::ast_str(val->type).c_str());
-        print(val, std::cout);
-        std::cout << std::endl;
+        qDebug("[DEBUG] COPY  | addr: 0x%p, node: %-10s, val: ", new_val, cast::ast_str(val->type).c_str());
+        std::stringstream ss;
+        print(val, ss);
+        qDebug() << QString::fromLocal8Bit(ss.str().c_str());
+        qDebug("\n");
 #endif
         return new_val;
     }
@@ -441,7 +445,7 @@ namespace clib {
             }
             env = env->val._env.parent;
         }
-        printf("invalid symbol: %s\n", sym);
+        qDebug("invalid symbol: %s\n", sym);
         error("cannot find symbol");
         return nullptr;
     }
@@ -457,39 +461,44 @@ namespace clib {
 #if SHOW_ALLOCATE_NODE
         mem.set_callback([](void *ptr) {
             cval *val = (cval *) ptr;
-            printf("[DEBUG] GC    | free: 0x%p, node: %-10s, ", ptr, cast::ast_str(val->type).c_str());
+            qDebug("[DEBUG] GC    | free: 0x%p, node: %-10s, ", ptr, cast::ast_str(val->type).c_str());
             if (val->type == ast_sexpr || val->type == ast_qexpr) {
-                printf("count: %lu\n", children_size(val));
+                qDebug("count: %lu\n", children_size(val));
             } else if (val->type == ast_literal) {
-                printf("id: %s\n", val->val._string);
+                qDebug("id: %s\n", val->val._string);
             } else if (val->type == ast_env) {
-                printf("env: %d\n", val->val._env.env->size());
+                qDebug("env: %d\n", val->val._env.env->size());
                 delete val->val._env.env;
             } else if (val->type == ast_sub) {
-                printf("name: %s\n", sub_name(val));
+                qDebug("name: %s\n", sub_name(val));
             } else {
-                printf("val: ");
-                print(val, std::cout);
-                std::cout << std::endl;
+                qDebug("val: ");
+                std::stringstream ss;
+                print(val, ss);
+                qDebug() << QString::fromLocal8Bit(ss.str().c_str());
+                qDebug("\n");
             }
         });
         mem.set_dump_callback([](void *ptr, int level) {
             cval *val = (cval *) ptr;
-            printf("[DEBUG] DUMP  | ");
-            std::cout << std::setfill('_') << std::setw(level << 2) << "";
-            printf("addr: 0x%p, node: %-10s, ", ptr, cast::ast_str(val->type).c_str());
+            qDebug("[DEBUG] DUMP  | ");
+            for (auto i = 0; i < level << 2; i++)
+                qDebug("_");
+            qDebug("addr: 0x%p, node: %-10s, ", ptr, cast::ast_str(val->type).c_str());
             if (val->type == ast_sexpr || val->type == ast_qexpr) {
-                printf("count: %lu\n", children_size(val));
+                qDebug("count: %lu\n", children_size(val));
             } else if (val->type == ast_literal) {
-                printf("id: %s\n", val->val._string);
+                qDebug("id: %s\n", val->val._string);
             } else if (val->type == ast_env) {
-                printf("env: %d\n", val->val._env.env->size());
+                qDebug("env: %d\n", val->val._env.env->size());
             } else if (val->type == ast_sub) {
-                printf("name: %s\n", sub_name(val));
+                qDebug("name: %s\n", sub_name(val));
             } else {
-                printf("val: ");
-                print(val, std::cout);
-                std::cout << std::endl;
+                qDebug("val: ");
+                std::stringstream ss;
+                print(val, ss);
+                qDebug() << QString::fromLocal8Bit(ss.str().c_str());
+                qDebug("\n");
             }
         });
 #else
@@ -516,7 +525,9 @@ namespace clib {
 
     void cvm::dump() {
 #if SHOW_ALLOCATE_NODE
-        mem.dump(std::cout);
+        std::stringstream ss;
+        mem.dump(ss);
+        qDebug() << QString::fromLocal8Bit(ss.str().c_str());
 #endif
     }
 

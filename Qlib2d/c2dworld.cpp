@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "c2dworld.h"
 #include "q2dhelper.h"
+#include "cexception.h"
 #include "cparser.h"
 #include "csub.h"
 
@@ -371,7 +372,7 @@ namespace clib {
         helper->paint_text(w - 200, h - 20, QString::fromLocal8Bit("碰撞: %1, 休眠: %2")
             .arg(collisions.size()).arg(sleep_bodies()), Q2dHelper::PAINT_TYPE::NormalText);
         if (paused)
-            helper->paint_text(w / 2 - 30, 20, "暂停", Q2dHelper::PAINT_TYPE::NormalText);
+            helper->paint_text(w / 2 - 30, h - 20, QString::fromLocal8Bit("暂停"), Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(w / 2 - 200, (QApplication::desktop()->width() < 1920) ? 30 : 40, title, Q2dHelper::PAINT_TYPE::TitleText);
 
         if (animation_id != 0)
@@ -455,7 +456,8 @@ namespace clib {
     }
 
     void c2d_world::scene(int id) {
-        clear();
+        if (id != 7)
+            clear();
         switch (id) {
             case 1: { // 一矩形、两三角形
                 title = QString::fromLocal8Bit("【场景一】矩形与三角形");
@@ -657,7 +659,7 @@ namespace clib {
         if (animation_id != id) {
             if (id == 1 || id == 2) {
                 if (id == 1) {
-                    animation_code = QString(R"(quote (hello world))");
+                    animation_code = QString(R"(+ __author__ " " __project__)");
                     animation_queue.enqueue(QString(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.04d 0.05d) `(mass 1d))) (range 0 10))"));
                     animation_queue.enqueue(QString(R"(map (\ `n `(circle`(pos 0.0d 0.0d) `(r 0.025d) `(mass 1d))) (range 0 5))"));
                     animation_queue.enqueue(QString(R"(map (\ `n `(tri`(pos 0.0d 0.0d) `(edge 0.04d 0.04d) `(angle 60d) `(mass 1d))) (range 0 5))"));
@@ -665,13 +667,13 @@ namespace clib {
                 emit helper->output(QString("Running lisp...\n%1").arg(animation_code), 0);
                 // vm.reset();
                 try {
-                    parser = std::make_unique<cparser>(animation_code.toStdString());
+                    parser = std::make_unique<cparser>(std::string(animation_code.toLocal8Bit()));
                     auto node = parser->parse();
                     vm.prepare(node);
-                } catch (const std::exception &e) {
-                    printf("RUNTIME ERROR: %s\n", e.what());
+                } catch (const cexception &e) {
+                    qDebug() << e.msg;
                     parser.reset(nullptr);
-                    emit helper->output(QString("Error"), 0);
+                    emit helper->output(QString(e.msg), 0);
                     return;
                 }
                 vm.save();
@@ -697,16 +699,17 @@ namespace clib {
             if (val != nullptr) {
                 std::stringstream ss;
                 clib::cvm::print(val, ss);
-                emit helper->output(QString::fromStdString(ss.str()), 0);
+                auto output = QString::fromLocal8Bit(ss.str().c_str());
+                emit helper->output(output, 0);
                 vm.gc();
                 stop_animation();
             }
-        } catch (const std::exception &e) {
-            printf("RUNTIME ERROR: %s\n", e.what());
+        } catch (const cexception &e) {
+            qDebug() << e.msg;
             vm.restore();
             vm.gc();
             stop_animation();
-            emit helper->output(QString("Error"), 0);
+            emit helper->output(QString(e.msg), 0);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace clib {
 
     ast_node *cast::new_node(ast_t type) {
         if (nodes.available() < 64) {
-            printf("AST ERROR: 'nodes' out of memory\n");
+            qDebug("AST ERROR: 'nodes' out of memory\n");
             throw std::exception();
         }
         auto node = nodes.alloc<ast_node>();
@@ -106,7 +106,7 @@ namespace clib {
 
     void cast::set_str(ast_node *node, const string_t &str) {
         if (strings.available() < 64) {
-            printf("AST ERROR: 'strings' out of memory\n");
+            qDebug("AST ERROR: 'strings' out of memory\n");
             throw std::exception();
         }
         auto len = str.length();
@@ -119,7 +119,9 @@ namespace clib {
     std::string cast::display_str(const char *str) {
         std::stringstream ss;
         for (auto c = str; *c != 0; c++) {
-            if (isprint(*c)) {
+            if (*c < 0) {
+                ss << *c;
+            } else if (isprint(*c)) {
                 ss << *c;
             } else {
                 if (*c == '\n')
@@ -173,10 +175,13 @@ namespace clib {
                 os << ')';
                 break;
             case ast_qexpr:
-                os << '`';
-                if (node->child == node->child->next) {
+                if (!node->child) {
+                    os << "nil";
+                } else if (node->child == node->child->next) {
+                    os << '`';
                     ast_recursion(node->child, level + 1, os, rec);
                 } else {
+                    os << '`';
                     os << '(';
                     ast_recursion(node->child, level + 1, os, rec);
                     os << ')';

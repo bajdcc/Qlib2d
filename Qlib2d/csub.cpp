@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "c2dworld.h"
 #include "v2.h"
+#include "cexception.h"
 #include "cvm.h"
 #include "csub.h"
 #include "cparser.h"
@@ -22,7 +23,7 @@ namespace clib {
     static void add_builtin(cenv &env, const char *name, cval *val) {
         env.insert(std::make_pair(name, val));
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for builtin\n", val, cast::ast_str(val->type).c_str());
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for builtin\n", val, cast::ast_str(val->type).c_str());
 #endif
     }
 
@@ -30,6 +31,8 @@ namespace clib {
         // Load init code
         auto codes = std::vector<std::string>{
                 R"(def `nil `())",
+                R"(def `__author__ "bajdcc")",
+                R"(def `__project__ "Qlib2d")",
                 R"(def `cadr (\ `x `(car (cdr x))))",
                 R"(def `caar (\ `x `(car (car x))))",
                 R"(def `cdar (\ `x `(cdr (car x))))",
@@ -46,16 +49,20 @@ namespace clib {
                 prepare(root);
                 auto val = run(INT32_MAX);
 #if SHOW_ALLOCATE_NODE
-                std::cout << "builtin> ";
-                cast::print(root, 0, std::cout);
-                std::cout << std::endl;
-                cvm::print(val, std::cout);
-                std::cout << std::endl;
+                qDebug() << "builtin> ";
+                std::stringstream ss;
+                cast::print(root, 0, ss);
+                qDebug() << QString::fromStdString(ss.str());
+                qDebug("\n");
+                ss.str("");
+                cvm::print(val, ss);
+                qDebug() << QString::fromStdString(ss.str());
+                qDebug("\n");
 #endif
                 gc();
             }
-        } catch (const std::exception &e) {
-            printf("RUNTIME ERROR: %s\n", e.what());
+        } catch (const cexception &e) {
+            qDebug() << e.msg;
             restore();
             gc();
             exit(-1);
@@ -64,8 +71,6 @@ namespace clib {
 
     void cvm::builtin_init() {
         auto &_env = *global_env->val._env.env;
-        add_builtin(_env, "__author__", val_str(ast_string, "bajdcc"));
-        add_builtin(_env, "__project__", val_str(ast_string, "cliblisp"));
         add_builtin(_env, "+", val_sub("+", builtins::add));
         add_builtin(_env, "-", val_sub("-", builtins::sub));
         add_builtin(_env, "*", val_sub("*", builtins::mul));
@@ -96,6 +101,7 @@ namespace clib {
         ADD_BUILTIN(box);
         ADD_BUILTIN(circle);
         ADD_BUILTIN(tri);
+        ADD_BUILTIN(scene);
 #undef ADD_BUILTIN
     }
 
@@ -311,11 +317,11 @@ namespace clib {
                     vm->mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
                     if (op->type == ast_literal) {
-                        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, count: %lu\n", v,
+                        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, count: %lu\n", v,
                                cast::ast_str(val->type).c_str(),
                                children_size(val));
                     } else {
-                        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s\n", v, cast::ast_str(op->type).c_str());
+                        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s\n", v, cast::ast_str(op->type).c_str());
                     }
 #endif
                     v->val._v.child = nullptr;
@@ -443,7 +449,7 @@ namespace clib {
         auto v = vm->val_obj(ast_qexpr);
         vm->mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for quote\n", v, cast::ast_str(v->type).c_str());
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for quote\n", v, cast::ast_str(v->type).c_str());
 #endif
         v->val._v.count = 1;
         v->val._v.child = vm->copy(op);
@@ -459,7 +465,7 @@ namespace clib {
         auto v = vm->val_obj(ast_qexpr);
         vm->mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for list\n", v, cast::ast_str(v->type).c_str());
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for list\n", v, cast::ast_str(v->type).c_str());
 #endif
         auto i = op;
         auto local = vm->copy(i);
@@ -504,7 +510,7 @@ namespace clib {
                 auto v = vm->val_obj(ast_qexpr);
                 vm->mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-                printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for cdr\n", v, cast::ast_str(v->type).c_str());
+                qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for cdr\n", v, cast::ast_str(v->type).c_str());
 #endif
                 auto i = op->val._v.child->next;
                 auto local = vm->copy(i);
@@ -555,7 +561,7 @@ namespace clib {
         auto v = vm->val_obj(ast_qexpr);
         vm->mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for cons\n", v, cast::ast_str(v->type).c_str());
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for cons\n", v, cast::ast_str(v->type).c_str());
 #endif
         v->val._v.child = vm->copy(op);
         v->val._v.count = 1 + op2->val._v.count;
@@ -782,7 +788,7 @@ namespace clib {
         auto v = vm->copy(op);
         vm->mem.push_root(v);
 #if SHOW_ALLOCATE_NODE
-        printf("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for append\n", v, cast::ast_str(v->type).c_str());
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for append\n", v, cast::ast_str(v->type).c_str());
 #endif
         auto i = op->next;
         auto local = v->val._v.child;
@@ -868,7 +874,7 @@ namespace clib {
         } else {
             s = op->val._string;
         }
-        std::cout << s;
+        qDebug() << QString::fromStdString(s);
         VM_RET(VM_NIL);
     }
 
@@ -901,7 +907,7 @@ namespace clib {
         }
         vm->get_world()->make_rect(mass, w, h, pos);
 #if LISP_DEBUG
-        printf("[DEBUG] Create box by lisp.\n");
+        qDebug("[DEBUG] Create box by lisp.\n");
 #endif
         VM_RET(VM_NIL);
     }
@@ -933,7 +939,7 @@ namespace clib {
         }
         vm->get_world()->make_circle(mass, r, pos);
 #if LISP_DEBUG
-        printf("[DEBUG] Create box by lisp.\n");
+        qDebug("[DEBUG] Create box by lisp.\n");
 #endif
         VM_RET(VM_NIL);
     }
@@ -980,8 +986,22 @@ namespace clib {
         vertices[2].y = b * std::sin(angle);
         vm->get_world()->make_polygon(mass, vertices, pos);
 #if LISP_DEBUG
-        printf("[DEBUG] Create box by lisp.\n");
+        qDebug("[DEBUG] Create box by lisp.\n");
 #endif
+        VM_RET(VM_NIL);
+    }
+
+    status_t builtins::scene(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        if (val->val._v.count != 2)
+            vm->error("scene requires 1 args");
+        auto op = VM_OP(val);
+        decltype(op->val._string) s;
+        if (op->type == ast_int) {
+            auto i = op->val._int;
+            vm->get_world()->scene(i);
+        }
         VM_RET(VM_NIL);
     }
 }

@@ -131,6 +131,7 @@
     <ClCompile Include="c2drevolute.cpp" />
     <ClCompile Include="c2dworld.cpp" />
     <ClCompile Include="cast.cpp" />
+    <ClCompile Include="cexception.cpp" />
     <ClCompile Include="clexer.cpp" />
     <ClCompile Include="cparser.cpp" />
     <ClCompile Include="csub.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="c2drevolute.h" />
     <ClInclude Include="c2dworld.h" />
     <ClInclude Include="cast.h" />
+    <ClInclude Include="cexception.h" />
     <ClInclude Include="clexer.h" />
     <ClInclude Include="cparser.h" />
     <ClInclude Include="csub.h" />

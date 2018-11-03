@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include "cexception.h"
 #include "cparser.h"
 #include "clexer.h"
 #include "cast.h"
@@ -33,7 +34,7 @@ namespace clib {
             token = lexer.next();
             if (token == l_error) {
                 auto err = lexer.recent_error();
-                printf("[%04d:%03d] %-12s - %s\n",
+                qDebug("[%04d:%03d] %-12s - %s\n",
                        err.line,
                        err.column,
                        ERROR_STRING(err.err).c_str(),
@@ -42,7 +43,7 @@ namespace clib {
         } while (token == l_newline || token == l_space || token == l_error);
 #if 0
         if (token != l_end) {
-            printf("[%04d:%03d] %-12s - %s\n",
+            qDebug("[%04d:%03d] %-12s - %s\n",
                    lexer.get_last_line(),
                    lexer.get_last_column(),
                    LEX_STRING(lexer.get_type()).c_str(),
@@ -86,8 +87,8 @@ namespace clib {
     }
 
     void cparser::error(const string_t &info) {
-        printf("[%04d:%03d] ERROR: %s\n", lexer.get_line(), lexer.get_column(), info.c_str());
-        throw std::exception();
+        throw cexception(QString().sprintf("[%04d:%03d]", lexer.get_line(), lexer.get_column()) +
+            QString(" PARSER ERROR: %1\n").arg(QString::fromLocal8Bit(info.c_str())));
     }
 
     ast_node *cparser::lambda(bool paran) {
