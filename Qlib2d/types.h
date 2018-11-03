@@ -32,8 +32,8 @@ namespace clib {
 
     using sint = signed int;
     using uint = unsigned int;
-    using slong = long;
-    using ulong = unsigned long;
+    using slong = long long;
+    using ulong = unsigned long long;
 
     using byte = uint8;
 

@@ -11,6 +11,11 @@ public:
     Q2dImpl(QWidget *parent = nullptr);
     ~Q2dImpl();
 
+    Q2dHelper * get_helper();
+
+signals:
+    void escape();
+
 public slots:
     void animate();
 

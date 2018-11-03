@@ -15,7 +15,7 @@ namespace clib {
     decimal c2d_world::dt = FRAME_SPAN;
     decimal c2d_world::dt_inv = 1.0 * FPS;
     bool c2d_world::paused = false; // 是否暂停
-    std::string c2d_world::title("[TITLE]"); // 标题
+    QString c2d_world::title("[TITLE]"); // 标题
     c2d_world *world = nullptr;
 
     c2d_polygon *c2d_world::make_polygon(decimal mass, const std::vector<v2> &vertices, const v2 &pos, bool statics) {
@@ -328,6 +328,8 @@ namespace clib {
         collision_remove_sleep();
 #endif
 
+        helper->clear();
+
         for (auto &body : static_bodies) {
             body->draw(helper);
         }
@@ -343,6 +345,18 @@ namespace clib {
 
         if (mouse_drag) {
         }
+
+        auto size = helper->get_size();
+        auto w = size.width();
+        auto h = size.height();
+        helper->paint_text(10, 20, "Qlib2d @bajdcc");
+        helper->paint_text(w - 110, 20, QString().sprintf("FPS: %.1f", dt_inv));
+        helper->paint_text(10, h - 20, "#c5p2");
+        helper->paint_text(w - 200, h - 20, QString::fromLocal8Bit("碰撞: %1, 休眠: %2")
+            .arg(collisions.size()).arg(sleep_bodies()));
+        if (paused)
+            helper->paint_text(w / 2 - 30, 20, "暂停");
+        helper->paint_text(w / 2 - 200, (QApplication::desktop()->width() < 1920) ? 30 : 40, title);
     }
 
     void c2d_world::move(const v2 &v) {
@@ -416,7 +430,7 @@ namespace clib {
         clear();
         switch (id) {
             case 1: { // 一矩形、两三角形
-                title = "[SCENE 1] One rectangle and two triangles";
+                title = QString::fromLocal8Bit("【场景一】矩形与三角形");
                 make_bound();
                 std::vector<v2> vertices = {
                     {-0.05, 0},
@@ -429,7 +443,7 @@ namespace clib {
             }
                 break;
             case 2: { // 堆叠的方块
-                title = "[SCENE 2] Rectangle stack";
+                title = QString::fromLocal8Bit("【场景二】堆叠的方块");
                 make_bound();
                 std::default_random_engine e((uint32_t) time(nullptr));
                 std::normal_distribution<decimal> dist{-0.01, 0.01};
@@ -441,7 +455,7 @@ namespace clib {
             }
                 break;
             case 3: { // 金字塔
-                title = "[SCENE 3] Rectangle pyramid";
+                title = QString::fromLocal8Bit("【场景三】金字塔");
                 make_bound();
                 v2 x{-0.2, -0.24};
                 v2 y;
@@ -457,7 +471,7 @@ namespace clib {
             }
                 break;
             case 4: { // 牛顿摆
-                title = "[SCENE 4] Newton's cradle";
+                title = QString::fromLocal8Bit("【场景四】牛顿摆");
                 auto ground = make_rect(inf, 2, 0.02, {0, -0.5}, true);
                 auto box1 = make_rect(100, 0.1, 0.1, {1.15, 0.6});
                 box1->CO = 0.99;
@@ -470,7 +484,7 @@ namespace clib {
             }
                 break;
             case 5: { // 铰链
-                title = "[SCENE 5] Joints";
+                title = QString::fromLocal8Bit("【场景五】铰链");
                 auto ground = make_rect(1, 2, 0.04, {0, -0.5}, true);
                 ground->f = 0.8;
                 const auto mass = 10.0;
@@ -485,7 +499,7 @@ namespace clib {
             }
                 break;
             case 6: { // 金字塔（圆与多边形）
-                title = "[SCENE 6] Rectangle and circle pyramid";
+                title = QString::fromLocal8Bit("【场景六】金字塔（圆与多边形）");
                 make_bound();
                 v2 x{-0.4, -0.25};
                 v2 y;
@@ -527,20 +541,20 @@ namespace clib {
                                 make_circle(1, dist(e), y)->f = 0.2;
                                 break;
                         }
-                        y += {0.082, 0.0};
+                        y += {0.1, 0.0};
                     }
                     x += {0.05125, 0.082};
                 }
             }
                 break;
-            case 7: { // 歌词
-                title = "[SCENE 7] Font animation";
+            case 7: { // 脚本
+                title = QString::fromLocal8Bit("【场景七】脚本");
                 make_bound();
                 start_animation(1);
             }
                 break;
             default: {
-                title = "[SCENE DEFAULT] Rectangle, triangle and circle";
+                title = QString::fromLocal8Bit("【默认场景】常见几何图形");
                 make_bound();
                 make_rect(1, 0.1, 0.1, {0, 0})->f = 0.2;
                 make_circle(1, 0.05, {0.1, 0})->f = 0.2;
@@ -556,7 +570,17 @@ namespace clib {
     }
 
     void c2d_world::init() {
+        vm.set_world(this);
         scene(0);
+    }
+
+    void c2d_world::exec(QString & str)
+    {
+        if (animation_id == 0) {
+            animation_code = str;
+            start_animation(2);
+            str.clear();
+        }
     }
 
     void c2d_world::toggle_pause()
@@ -598,18 +622,19 @@ namespace clib {
 
     void c2d_world::start_animation(uint32_t id) {
         if (animation_id != id) {
-            if (id == 1) {
-                animation_code =
-                        R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.08d 0.1d) `(mass 1d))) (range 0 10))";
+            if (id == 1 || id == 2) {
+                if (id == 1)
+                    animation_code =
+                        QString(R"(map (\ `n `(box`(pos 0.0d 0.0d) `(size 0.08d 0.1d) `(mass 1d))) (range 0 10))");
                 vm.reset();
                 try {
-                    parser = new cparser(animation_code);
+                    parser = std::make_unique<cparser>(animation_code.toStdString());
                     auto node = parser->parse();
                     vm.prepare(node);
                 } catch (const std::exception &e) {
                     printf("RUNTIME ERROR: %s\n", e.what());
-                    delete parser;
-                    parser = nullptr;
+                    parser.reset(nullptr);
+                    emit helper->output(QString("Error"));
                     return;
                 }
                 vm.save();
@@ -620,15 +645,18 @@ namespace clib {
 
     void c2d_world::stop_animation() {
         if (animation_id != 0) {
-            delete parser;
-            parser = nullptr;
+            parser.reset(nullptr);
             animation_id = 0;
         }
     }
 
     void c2d_world::run_animation() {
         try {
-            if (vm.run(LISP_CYCLE) != nullptr) {
+            auto val = vm.run(LISP_CYCLE);
+            if (val != nullptr) {
+                std::stringstream ss;
+                clib::cvm::print(val, ss);
+                emit helper->output(QString::fromStdString(ss.str()));
                 vm.gc();
                 stop_animation();
             }
@@ -637,6 +665,7 @@ namespace clib {
             vm.restore();
             vm.gc();
             stop_animation();
+            emit helper->output(QString("Error"));
         }
     }
 }

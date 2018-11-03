@@ -12,13 +12,14 @@ class Qlib2d : public QMainWindow
 public:
     Qlib2d(QWidget *parent = Q_NULLPTR);
 
+signals:
+    void send_command(QString &);
+
 private:
     Ui::Qlib2dClass ui;
 
 private slots:
     void execLispCommand();
-
-private:
-    clib::cvm vm;
-    std::unique_ptr<clib::cparser> parser;
+    void escape();
+    void output(QString &);
 };

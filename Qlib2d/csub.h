@@ -47,6 +47,8 @@ namespace clib {
         static status_t str(cvm *vm, cframe *frame);
 
         static status_t print(cvm *vm, cframe *frame);
+
+        static status_t box(cvm *vm, cframe *frame);
     };
 }
 

@@ -73,6 +73,8 @@ namespace clib {
         // 初始化
         void init();
 
+        void exec(QString & str);
+
         void toggle_pause();
         void toggle_gravity();
 
@@ -92,13 +94,13 @@ namespace clib {
         static decimal dt;
         static decimal dt_inv;
         static bool paused; // 是否暂停
-        static std::string title; // 标题
+        static QString title; // 标题
 
     private:
         uint32_t animation_id{0};
-        std::string animation_code;
+        QString animation_code;
         cvm vm;
-        cparser *parser;
+        std::unique_ptr<cparser> parser;
 
         Q2dHelper *helper;
 

@@ -20,12 +20,17 @@ Q2dHelper::~Q2dHelper()
 void Q2dHelper::paint(QPainter * painter, QPaintEvent * event, int elapsed)
 {
     auto rect = event->rect();
-    mid = rect.size() * 0.5;
+    size = rect.size();
+    mid = size * 0.5;
     mid_width = mid.width() >= mid.height();
     this->painter = painter;
     this->event = event;
-    painter->fillRect(event->rect(), background);
     world.step(this);
+}
+
+void Q2dHelper::clear()
+{
+    painter->fillRect(event->rect(), background);
 }
 
 void Q2dHelper::paint_polygon(const std::vector<clib::v2>& v, PAINT_TYPE type)
@@ -79,9 +84,21 @@ void Q2dHelper::paint_circle(const clib::v2 & v, const qreal & r, PAINT_TYPE typ
     painter->drawEllipse(trans(v), R, R);
 }
 
+void Q2dHelper::paint_text(int x, int y, const QString & str)
+{
+    painter->setPen(font);
+    painter->setFont(text);
+    painter->drawText(x, y, str);
+}
+
 clib::c2d_world & Q2dHelper::get_world()
 {
     return world;
+}
+
+QSize Q2dHelper::get_size()
+{
+    return size;
 }
 
 void Q2dHelper::select_pen(PAINT_TYPE type)
@@ -124,6 +141,11 @@ void Q2dHelper::select_pen(PAINT_TYPE type)
     default:
         break;
     }
+}
+
+void Q2dHelper::exec(QString &str)
+{
+    world.exec(str);
 }
 
 QPointF Q2dHelper::trans(const clib::v2 & v)

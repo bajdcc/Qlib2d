@@ -374,7 +374,7 @@ LEX_T(t) clexer::get_store_##t(int index) const \
         auto _type = l_int; // 默认是整型
         auto _postfix = l_none;
         auto i = index;
-        auto n = 0UL, _n = 0UL;
+        auto n = 0ULL, _n = 0ULL;
         auto d = 0.0;
         if (local() == '0' && (local(1) == 'x' || local(1) == 'x')) {
             auto cc = 0;

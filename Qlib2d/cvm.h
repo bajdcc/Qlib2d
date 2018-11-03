@@ -17,6 +17,7 @@
 namespace clib {
 
     class cvm;
+    class c2d_world;
     struct cframe;
 
     enum status_t {
@@ -98,6 +99,9 @@ namespace clib {
         void dump();
         void reset();
 
+        void set_world(c2d_world * world);
+        c2d_world * get_world() const;
+
     private:
         void builtin();
         void builtin_init();
@@ -137,6 +141,7 @@ namespace clib {
         memory_pool<VM_TMP> eval_tmp;
         cval *root{nullptr};
         cval *ret{nullptr};
+        c2d_world *world{ nullptr };
     };
 }
 

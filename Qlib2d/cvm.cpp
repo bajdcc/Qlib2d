@@ -528,4 +528,14 @@ namespace clib {
         eval_tmp.clear();
         builtin();
     }
+
+    void cvm::set_world(c2d_world * world)
+    {
+        this->world = world;
+    }
+
+    c2d_world * cvm::get_world() const
+    {
+        return this->world;
+    }
 }

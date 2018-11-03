@@ -15,6 +15,11 @@ Q2dImpl::~Q2dImpl()
 {
 }
 
+Q2dHelper * Q2dImpl::get_helper()
+{
+    return &helper;
+}
+
 void Q2dImpl::animate()
 {
     elapsed = (elapsed + qobject_cast<QTimer*>(sender())->interval()) % 1000;
@@ -38,7 +43,7 @@ void Q2dImpl::keyPressEvent(QKeyEvent * event)
     }
     switch (event->key()) {
     case Qt::Key_Escape:
-        QApplication::quit();
+        emit escape();
         break;
     case Qt::Key_Space:
         helper.get_world().toggle_pause();

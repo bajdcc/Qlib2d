@@ -4,6 +4,8 @@
 //
 
 #include "stdafx.h"
+#include "c2dworld.h"
+#include "v2.h"
 #include "cvm.h"
 #include "csub.h"
 #include "cparser.h"
@@ -91,6 +93,7 @@ namespace clib {
         ADD_BUILTIN(type);
         ADD_BUILTIN(str);
         ADD_BUILTIN(print);
+        ADD_BUILTIN(box);
 #undef ADD_BUILTIN
     }
 
@@ -864,6 +867,40 @@ namespace clib {
             s = op->val._string;
         }
         std::cout << s;
+        VM_RET(VM_NIL);
+    }
+
+    status_t builtins::box(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        auto i = VM_OP(val);
+        auto mass = 1.0;
+        auto w = 0.0;
+        auto h = 0.0;
+        auto pos = v2();
+        while (i) {
+            if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
+                auto op = i->val._v.child;
+                auto count = i->val._v.count;
+                auto str = op->val._string;
+                if (strstr(str, "mass") && count == 2 && op->next->type == ast_double) {
+                    mass = op->next->val._double;
+                }
+                else if (strstr(str, "size") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    w = op->next->val._double;
+                    h = op->next->next->val._double;
+                }
+                else if (strstr(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    pos.x = op->next->val._double;
+                    pos.y = op->next->next->val._double;
+                }
+            }
+            i = i->next;
+        }
+        auto box = vm->get_world()->make_rect(mass, w, h, pos);
+#if LISP_DEBUG
+        printf("[DEBUG] Create box by lisp.\n");
+#endif
         VM_RET(VM_NIL);
     }
 }
