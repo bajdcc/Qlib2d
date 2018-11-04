@@ -30,11 +30,12 @@ conf `(gravity 0d -9.8d) `(cycle 10)
 )");*/
             return QString::fromLocal8Bit(R"(
 conf `(gravity 0d -0.8d) `(cycle 1000) `(record)
+def `latest-len 0
 def `latest-time 0d
 def `latest-str ""
-def `lyc-gen (\ `(til str) `(begin (box (attr `pos (random -0.2d 0.2d) (random -0.1d 0.1d)) `(size 0.04d 0.04d) `(mass 1d) (attr `text str)) (conf (attr `wait til))))
-def `lyc-sen (\ `(L t SPAN) `(if (null? L) `nil `(begin (lyc-gen t (car L)) (lyc-sen (cdr L) (+ t SPAN) SPAN))))
-def `lyc-pri (\ `(t s) `(begin (def `L (word latest-str)) (def `SPAN (- t latest-time)) (lyc-sen L latest-time (/ SPAN (+ 1 (len L)))) (def `latest-time t) (def `latest-str s) (conf `(clear) `(bound))))
+def `lyc-gen (\ `(til str) `(begin (def `latest-len (+ latest-len)) (conf (attr `wait til)) (box (attr `pos (random -0.2d 0.2d) (random -0.1d 0.1d)) `(size 0.04d 0.04d) `(mass 1d) (attr `text str))))
+def `lyc-sen (\ `(L t SPAN) `(if (null? L) `(conf (attr `wait t)) `(begin (lyc-gen t (car L)) (lyc-sen (cdr L) (+ t SPAN) SPAN))))
+def `lyc-pri (\ `(t s) `(begin (def `L (word latest-str)) (def `SPAN (- t latest-time)) (lyc-sen L latest-time (/ SPAN (+ 2 (len L)))) (def `latest-time t) (def `latest-str s) (if (> latest-len 10) `(begin (def `latest-len 0) (conf `(clear) `(bound))) `nil) (conf (attr `gravity (random -0.2d 0.2d) (random -1d 0.1d)))))
 def `lyc (\ `(m t s) `(lyc-pri (+ (* m 60.0) t) s))
 lyc 0d 00.00d "ÕÅ»İÃÃ/ÁÖÒäÁ« - Ë«Ó°"
 lyc 0d 03.00d ""

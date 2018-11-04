@@ -1183,6 +1183,7 @@ namespace clib {
 
     status_t builtins::random(cvm * vm, cframe * frame)
     {
+        static int salt = 0;
         auto &val = frame->val;
         if (val->val._v.count != 3)
             vm->error("attr requires 2 args");
@@ -1190,7 +1191,7 @@ namespace clib {
         if (op->type != ast_double || op->next->type != ast_double)
             vm->error("attr requires 2 double args");
         auto v = vm->val_obj(ast_double);
-        std::default_random_engine e((uint32_t)time(nullptr));
+        std::default_random_engine e((uint32_t)time(nullptr) - (++salt) * 100);
         std::uniform_real_distribution<decimal> dist{ op->val._double, op->next->val._double };
         v->val._double = dist(e);
         VM_RET(v);
