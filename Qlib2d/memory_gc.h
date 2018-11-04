@@ -32,6 +32,10 @@ namespace clib {
             stack_roots.push_back(&stack_head);
         }
 
+        size_t available() const {
+            return memory.available();
+        }
+
         static gc_header *header(void *ptr) {
             return static_cast<gc_header *>((void *) (static_cast<char *>(ptr) - GC_HEADER_SIZE));
         }

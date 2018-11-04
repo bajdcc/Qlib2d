@@ -273,28 +273,32 @@ namespace clib {
         return nullptr;
     }
 
-    std::tuple<ast_t, string_t> ast_list[] = {
-        std::make_tuple(ast_root, "root"),
-        std::make_tuple(ast_env, "env"),
-        std::make_tuple(ast_sub, "sub"),
-        std::make_tuple(ast_lambda, "lambda"),
-        std::make_tuple(ast_sexpr, "S-exp"),
-        std::make_tuple(ast_qexpr, "Q-exp"),
-        std::make_tuple(ast_literal, "literal"),
-        std::make_tuple(ast_string, "string"),
-        std::make_tuple(ast_char, "char"),
-        std::make_tuple(ast_uchar, "uchar"),
-        std::make_tuple(ast_short, "short"),
-        std::make_tuple(ast_ushort, "ushort"),
-        std::make_tuple(ast_int, "int"),
-        std::make_tuple(ast_uint, "uint"),
-        std::make_tuple(ast_long, "long"),
-        std::make_tuple(ast_ulong, "ulong"),
-        std::make_tuple(ast_float, "float"),
-        std::make_tuple(ast_double, "double"),
+    std::tuple<ast_t, string_t, int> ast_list[] = {
+        std::make_tuple(ast_root,       "root",     0),
+        std::make_tuple(ast_env,        "env",      0),
+        std::make_tuple(ast_sub,        "sub",      0),
+        std::make_tuple(ast_lambda,     "lambda",   0),
+        std::make_tuple(ast_sexpr,      "S-exp",    0),
+        std::make_tuple(ast_qexpr,      "Q-exp",    0),
+        std::make_tuple(ast_literal,    "literal",  0),
+        std::make_tuple(ast_string,     "string",   0),
+        std::make_tuple(ast_char,       "char",     1),
+        std::make_tuple(ast_uchar,      "uchar",    2),
+        std::make_tuple(ast_short,      "short",    3),
+        std::make_tuple(ast_ushort,     "ushort",   4),
+        std::make_tuple(ast_int,        "int",      5),
+        std::make_tuple(ast_uint,       "uint",     6),
+        std::make_tuple(ast_long,       "long",     7),
+        std::make_tuple(ast_ulong,      "ulong",    8),
+        std::make_tuple(ast_float,      "float",    9),
+        std::make_tuple(ast_double,     "double",   10),
     };
 
     const string_t &cast::ast_str(ast_t type) {
         return std::get<1>(ast_list[type]);
+    }
+
+    int cast::ast_prior(ast_t type) {
+        return std::get<2>(ast_list[type]);
     }
 }

@@ -182,6 +182,9 @@ void Q2dHelper::select(PAINT_TYPE type)
     case Q2dHelper::CodeText:
         painter->setFont(code_text);
         break;
+    case Q2dHelper::AnimationText:
+            painter->setFont(animation_text);
+            break;
     default:
         break;
     }

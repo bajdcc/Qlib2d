@@ -11,7 +11,7 @@
 class Q2dHelper;
 
 namespace clib {
-// 圆形刚体（正圆）
+    // 圆形刚体（正圆）
     class c2d_circle : public c2d_body {
     public:
         using ptr = std::unique_ptr<c2d_circle>;

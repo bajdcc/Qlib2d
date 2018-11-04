@@ -6,9 +6,9 @@
 #ifndef CLIBLISP_CVM_H
 #define CLIBLISP_CVM_H
 
-#define VM_MEM (32 * 1024)
-#define VM_EVAL (32 * 1024)
-#define VM_TMP (32 * 1024)
+#define VM_MEM (16 * 1024)
+#define VM_EVAL (2 * 1024)
+#define VM_TMP (2 * 1024)
 #define SHOW_ALLOCATE_NODE 0
 
 #include "cast.h"
@@ -23,6 +23,7 @@ namespace clib {
     enum status_t {
         s_ret,
         s_call,
+        s_sleep,
         s_error,
     };
 
@@ -86,7 +87,7 @@ namespace clib {
         friend class builtins;
 
         void prepare(ast_node *node);
-        cval *run(int cycle);
+        cval *run(int cycle, int &cycles);
         void gc();
 
         static void print(cval *val, std::ostream &os);
@@ -111,8 +112,10 @@ namespace clib {
         status_t call(csub fun, cval *val, cval *env, cval **ret);
 
         int calc(int op, ast_t type, cval *r, cval *v, cval *env);
+        void promote(ast_t type, cval *v);
         cval *calc_op(int op, cval *val, cval *env);
         cval *calc_symbol(const char *sym, cval *env);
+        cval *def(cval *env, const char *sym, cval *val);
         cval *calc_sub(const char *sub, cval *val, cval *env);
 
         static status_t eval(cvm *vm, cframe *frame);

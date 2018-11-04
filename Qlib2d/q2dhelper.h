@@ -30,6 +30,7 @@ public:
         NormalText,
         TitleText,
         CodeText,
+        AnimationText,
     };
 
     void clear();
@@ -84,6 +85,7 @@ private:
     QFont normal_text{ "Consolas", 15, 40 };
     QFont title_text{ "¿¬Ìå", 18, 40 };
     QFont code_text{ "Consolas", 10, 30 };
+    QFont animation_text{ "Consolas", 24, 40 };
 
     clib::c2d_world world;
 };

@@ -139,16 +139,20 @@ struct base_lexer_t<obj> \
 #undef DEFINE_CONV_TYPE
 
     const string_t &lexer_typestr(lexer_t);
+    int lexer_prior(lexer_t);
     const string_t &lexer_opstr(operator_t);
     const string_t &lexer_opnamestr(operator_t);
     const string_t &lexer_errstr(error_t);
 
     extern string_t keyword_string_list[];
 
+    bool strequ(const char *a, const char *b);
+
 #define LEX_T(t) base_t<l_##t>::type
 #define LEX_CONV_T(t) base_lexer_t<t>::type
 #define LEX_SIZEOF(t) base_t<l_##t>::size
 #define LEX_STRING(t) lexer_typestr(t)
+#define LEX_PRIOR(t) lexer_prior(t)
 
 #define OPERATOR_STRING(t) lexer_opnamestr(t)
 #define OP_STRING(t) lexer_opstr(t)

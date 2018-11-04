@@ -63,6 +63,7 @@ namespace clib {
 
         // 清除所有物体
         void clear();
+        void reset();
 
         // 建立四周边界
         void make_bound();
@@ -84,6 +85,9 @@ namespace clib {
         void set_gravity(const v2 & v);
         void set_cycle(int cycle);
 
+        void record();
+        bool reach(const decimal &d);
+
         void set_helper(Q2dHelper * helper);
 
     private:
@@ -91,7 +95,7 @@ namespace clib {
         void stop_animation();
         void run_animation();
 
-        static QString scene_7();
+        static QString get_script(uint32_t id);
 
     public:
         static QTime last_clock;
@@ -109,6 +113,8 @@ namespace clib {
 
         Q2dHelper *helper;
         int cycle{ LISP_CYCLE };
+
+        QTime record_now;
 
         bool mouse_drag{false};
         v2 global_drag; // 鼠标拖动

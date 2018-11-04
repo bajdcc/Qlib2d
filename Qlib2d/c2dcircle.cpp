@@ -128,7 +128,7 @@ namespace clib {
         }
         auto &p = pos;
         if (!text.isEmpty()) {
-            helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::NormalText);
+            helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::AnimationText);
             return;
         }
 #if ENABLE_SLEEP

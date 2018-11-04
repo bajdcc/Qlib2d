@@ -174,11 +174,9 @@ namespace clib {
             size = block_align(size);
             if (size >= block_available_size)
                 return nullptr;
-            if (block_current == block_head)
-                return alloc_free_block(size);
             auto blk = block_current;
             do {
-                if (block_get_flag(blk, BLOCK_USING) == 0 && blk->size >= size) {
+                if (block_get_flag(blk, BLOCK_USING) == 0 && blk->size >= size + 1) {
                     block_current = blk;
                     return alloc_free_block(size);
                 }
@@ -189,7 +187,7 @@ namespace clib {
 
         // 查找空闲块
         void *alloc_free_block(size_t size) {
-            if (block_current->size == size) // 申请的大小正好是空闲块大小
+            if (block_current->size == size + 1) // 申请的大小正好是空闲块大小
             {
                 return alloc_cur_block(size + 1);
             }
@@ -284,6 +282,51 @@ namespace clib {
             return _new;
         }
 
+        void check() {
+            auto ptr = block_head;
+            auto uses0 = 0;
+            auto uses1 = 0;
+            auto usings = 0;
+            if (ptr->next == ptr) {
+                uses0 += ptr->size + 1;
+                uses1 += ptr->size + 1;
+                if (block_get_flag(ptr, BLOCK_USING)) {
+                    usings += ptr->size + 1;
+                }
+            }
+            else {
+                uses0 += ptr->size + 1;
+                uses1 += ptr->size + 1;
+                if (block_get_flag(ptr, BLOCK_USING)) {
+                    usings += ptr->size + 1;
+                }
+                ptr = ptr->next;
+                while (ptr != block_head) {
+                    if (block_get_flag(ptr, BLOCK_USING)) {
+                        usings += ptr->size + 1;
+                    }
+                    uses0 += ptr->size + 1;
+                    ptr = ptr->next;
+                }
+                ptr = ptr->prev;
+                while (ptr != block_head) {
+                    uses1 += ptr->size + 1;
+                    ptr = ptr->prev;
+                }
+            }
+            if (uses0 != DEFAULT_ALLOC_BLOCK_SIZE)
+            {
+                auto j = 6;
+            }
+            if (usings + block_available_size != DEFAULT_ALLOC_BLOCK_SIZE - 1)
+            {
+                auto j = 6;
+            }
+            assert(uses0 == uses1);
+            assert(uses0 == DEFAULT_ALLOC_BLOCK_SIZE);
+            assert(usings + block_available_size == DEFAULT_ALLOC_BLOCK_SIZE - 1);
+        }
+
     public:
         // 默认的块总数
         static const size_t DEFAULT_ALLOC_BLOCK_SIZE = DefaultSize;
@@ -368,7 +411,7 @@ namespace clib {
 
     private:
         static void dump_block(block *blk, std::ostream &os) {
-            qDebug("[DEBUG] MEM   | [%p-%p] Size: %8lu, State: %s\n", blk, blk + blk->size, blk->size, block_get_flag(blk, BLOCK_USING) ? "Using" : "Free");
+            qDebug("[DEBUG] MEM   | [%p-%p] Size: %8lu, State: %s", blk, blk + blk->size, blk->size, block_get_flag(blk, BLOCK_USING) ? "Using" : "Free");
         }
     };
 

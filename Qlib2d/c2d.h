@@ -12,7 +12,7 @@
 #include <chrono>
 
 #define LISP_CYCLE 10
-#define LISP_DEBUG 1
+#define LISP_DEBUG 0
 #define FPS 30
 #define PAINT_SPAN (1000 / FPS)
 #define GRAVITY -9.8

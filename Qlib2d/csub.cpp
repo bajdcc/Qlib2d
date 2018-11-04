@@ -41,23 +41,21 @@ namespace clib {
                 R"((def `range (\ `(a b) `(if (== a b) `nil `(cons a (range (+ a 1) b))))))",
                 R"(def `map (\ `(f L) `(if (null? L) `nil `(cons (f (car L)) (map f (cdr L))))))",
         };
+        auto cycles = 0;
         try {
             for (auto &code : codes) {
                 save();
                 cparser p(code);
                 auto root = p.parse();
                 prepare(root);
-                auto val = run(INT32_MAX);
+                auto val = run(INT32_MAX, cycles);
 #if SHOW_ALLOCATE_NODE
-                qDebug() << "builtin> ";
                 std::stringstream ss;
+                ss << "builtin> ";
                 cast::print(root, 0, ss);
-                qDebug() << QString::fromStdString(ss.str());
-                qDebug("\n");
                 ss.str("");
                 cvm::print(val, ss);
-                qDebug() << QString::fromStdString(ss.str());
-                qDebug("\n");
+                qDebug() << QString::fromLocal8Bit(ss.str().c_str());
 #endif
                 gc();
             }
@@ -97,12 +95,15 @@ namespace clib {
         ADD_BUILTIN(len);
         ADD_BUILTIN(type);
         ADD_BUILTIN(str);
+        ADD_BUILTIN(word);
         ADD_BUILTIN(print);
         ADD_BUILTIN(box);
         ADD_BUILTIN(circle);
         ADD_BUILTIN(tri);
         ADD_BUILTIN(scene);
         ADD_BUILTIN(conf);
+        ADD_BUILTIN(attr);
+        ADD_BUILTIN(random);
 #undef ADD_BUILTIN
     }
 
@@ -118,6 +119,7 @@ namespace clib {
         bool ge(cval *r, cval *v) {}
         bool lt(cval *r, cval *v) {}
         bool gt(cval *r, cval *v) {}
+        void conv(cval *v) {}
     };
 
 #define DEFINE_VAL_OP(t) \
@@ -133,6 +135,18 @@ namespace clib {
         static bool ge(cval *r, cval *v) { return r->val._##t >= v->val._##t; } \
         static bool lt(cval *r, cval *v) { return r->val._##t < v->val._##t; } \
         static bool gt(cval *r, cval *v) { return r->val._##t > v->val._##t; } \
+        static void conv(cval *v) { switch (v->type) { \
+        case ast_char:  v->val._##t = v->val._char; break; \
+        case ast_uchar: v->val._##t = v->val._uchar; break; \
+        case ast_short: v->val._##t = v->val._short; break; \
+        case ast_ushort:v->val._##t = v->val._ushort; break; \
+        case ast_int:   v->val._##t = v->val._int; break; \
+        case ast_uint:  v->val._##t = v->val._uint; break; \
+        case ast_long:  v->val._##t = v->val._long; break; \
+        case ast_ulong: v->val._##t = v->val._ulong; break; \
+        case ast_float: v->val._##t = v->val._float; break; \
+        case ast_double:v->val._##t = v->val._double; break; \
+        } } \
     };
     DEFINE_VAL_OP(char)
     DEFINE_VAL_OP(uchar)
@@ -195,6 +209,30 @@ namespace clib {
         }
     }
 
+    void cvm::promote(ast_t type, cval * v)
+    {
+        switch (type) {
+#define DEFINE_CALC_TYPE(t) \
+            case ast_##t: \
+                gen_op<ast_##t>::conv(v); \
+                break;
+                DEFINE_CALC_TYPE(char)
+                DEFINE_CALC_TYPE(uchar)
+                DEFINE_CALC_TYPE(short)
+                DEFINE_CALC_TYPE(ushort)
+                DEFINE_CALC_TYPE(int)
+                DEFINE_CALC_TYPE(uint)
+                DEFINE_CALC_TYPE(long)
+                DEFINE_CALC_TYPE(ulong)
+                DEFINE_CALC_TYPE(float)
+                DEFINE_CALC_TYPE(double)
+#undef DEFINE_CALC_TYPE
+        default:
+            error("promote error");
+            break;
+        }
+    }
+
     cval *cvm::calc_op(int op, cval *val, cval *env) {
         if (!val)
             error("missing operator");
@@ -211,7 +249,8 @@ namespace clib {
                     ss << v->val._string;
                     v = v->next;
                 }
-                return val_str(ast_string, ss.str().c_str());
+                auto str = ss.str();
+                return val_str(ast_string, str.c_str());
             }
             error("invalid operator type for string");
         }
@@ -256,9 +295,19 @@ namespace clib {
         v = v->next;
         if (v) {
             while (v) {
-                if (r->type != v->type)
-                    error("invalid operator type");
-                calc(op, r->type, r, v, env);
+                auto _r = r;
+                auto _v = v;
+                if (_r->type != _v->type) {
+                    auto p1 = cast::ast_prior(_r->type);
+                    auto p2 = cast::ast_prior(_v->type);
+                    if (p1 == 0 || p2 == 0)
+                        error("invalid operator type");
+                    if (p2 > p1) {
+                        std::swap(_r, _v);
+                    }
+                    promote(_r->type, _v);
+                }
+                calc(op, _r->type, _r, _v, env);
                 v = v->next;
             }
         } else {
@@ -340,7 +389,7 @@ namespace clib {
                         auto &local = tmp->local;
                         auto &i = tmp->i;
                         if (op->type == ast_literal && local->type == ast_sub) {
-                            if (strstr(sub_name(local), "quote")) {
+                            if (strequ(sub_name(local), "quote")) {
                                 tmp->quote = true;
                             }
                         }
@@ -590,7 +639,7 @@ namespace clib {
         if (op->val._v.count == val->val._v.count - 2) {
             auto param = op->val._v.child;
             auto argument = op->next;
-            for (auto i = 0U; i < op->val._v.count; ++i) {
+            for (auto i = 0; i < op->val._v.count; ++i) {
                 if (param->type != ast_literal) {
                     vm->error("def need literal for Q-exp");
                 }
@@ -598,23 +647,22 @@ namespace clib {
             }
             param = op->val._v.child;
             vm->mem.push_root(env);
-            auto &_env = *env->val._env.env;
-            for (auto i = 0U; i < op->val._v.count; ++i) {
+            cval *first_def = nullptr;
+            for (auto i = 0; i < op->val._v.count; ++i) {
                 auto name = param->val._string;
-                auto old = _env.find(name);
-                if (old != _env.end()) {
-                    vm->mem.unlink(env, old->second);
-                }
-                _env[param->val._string] = vm->copy(argument);
+                auto _def = vm->def(env, name, argument);
+                if (first_def == nullptr)
+                    first_def = _def;
                 param = param->next;
                 argument = argument->next;
             }
             vm->mem.pop_root();
             if (op->val._v.count == 1) {
-                VM_RET(_env[op->val._v.child->val._string]);
+                VM_RET(vm->copy(first_def));
             }
             VM_RET(VM_NIL);
-        } else {
+        }
+        else {
             vm->error("def need same size of Q-exp and argument");
             VM_RET(nullptr);
         }
@@ -862,20 +910,53 @@ namespace clib {
         VM_RET(vm->val_str(ast_string, ss.str().c_str()));
     }
 
+    status_t builtins::word(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        if (val->val._v.count != 2)
+            vm->error("word requires 1 args");
+        auto op = VM_OP(val);
+        if (op->type != ast_string)
+            vm->error("word requires string");
+        auto s = QString::fromLocal8Bit(op->val._string);
+        auto v = vm->val_obj(ast_qexpr);
+        v->val._v.count = 0;
+        v->val._v.child = nullptr;
+        if (s.isEmpty()) {
+            VM_RET(v);
+        }
+        vm->mem.push_root(v);
+#if SHOW_ALLOCATE_NODE
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for word\n", v, cast::ast_str(v->type).c_str());
+#endif
+        auto len = s.length();
+        v->val._v.count = len;
+        v->val._v.child = vm->val_str(ast_string, s.left(1).toLocal8Bit());
+        auto local = v->val._v.child;
+        for (auto i = 1; i < len; i++)
+        {
+            local->next = vm->val_str(ast_string, s.mid(i, 1).toLocal8Bit());
+            local = local->next;
+        }
+        vm->mem.pop_root();
+        VM_RET(v);
+    }
+
     status_t builtins::print(cvm *vm, cframe *frame) {
         auto &val = frame->val;
         if (val->val._v.count != 2)
             vm->error("str requires 1 args");
         auto op = VM_OP(val);
-        decltype(op->val._string) s;
         if (op->type != ast_string) {
             std::stringstream ss;
             stringify(op, ss);
-            s = ss.str().c_str();
+            auto str = ss.str();
+            auto s = str.c_str();
+            qDebug() << QString::fromLocal8Bit(s);
         } else {
-            s = op->val._string;
+            auto s = op->val._string;
+            qDebug() << QString::fromLocal8Bit(s);
         }
-        qDebug() << QString::fromStdString(s);
         VM_RET(VM_NIL);
     }
 
@@ -893,18 +974,18 @@ namespace clib {
                 auto op = i->val._v.child;
                 auto count = i->val._v.count;
                 auto str = op->val._string;
-                if (strstr(str, "mass") && count == 2 && op->next->type == ast_double) {
+                if (strequ(str, "mass") && count == 2 && op->next->type == ast_double) {
                     mass = op->next->val._double;
                 }
-                else if (strstr(str, "size") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                else if (strequ(str, "size") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     w = op->next->val._double;
                     h = op->next->next->val._double;
                 }
-                else if (strstr(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                else if (strequ(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
-                else if (strstr(str, "text") && count == 2 && op->next->type == ast_string) {
+                else if (strequ(str, "text") && count == 2 && op->next->type == ast_string) {
                     s = QString::fromLocal8Bit(op->next->val._string);
                 }
             }
@@ -931,17 +1012,17 @@ namespace clib {
                 auto op = i->val._v.child;
                 auto count = i->val._v.count;
                 auto str = op->val._string;
-                if (strstr(str, "mass") && count == 2 && op->next->type == ast_double) {
+                if (strequ(str, "mass") && count == 2 && op->next->type == ast_double) {
                     mass = op->next->val._double;
                 }
-                else if (strstr(str, "r") && count == 2 && op->next->type == ast_double) {
+                else if (strequ(str, "r") && count == 2 && op->next->type == ast_double) {
                     r = op->next->val._double;
                 }
-                else if (strstr(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                else if (strequ(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
-                else if (strstr(str, "text") && count == 2 && op->next->type == ast_string) {
+                else if (strequ(str, "text") && count == 2 && op->next->type == ast_string) {
                     s = QString::fromLocal8Bit(op->next->val._string);
                 }
             }
@@ -975,21 +1056,21 @@ namespace clib {
                 auto op = i->val._v.child;
                 auto count = i->val._v.count;
                 auto str = op->val._string;
-                if (strstr(str, "mass") && count == 2 && op->next->type == ast_double) {
+                if (strequ(str, "mass") && count == 2 && op->next->type == ast_double) {
                     mass = op->next->val._double;
                 }
-                else if (strstr(str, "angle") && count == 2 && op->next->type == ast_double) {
+                else if (strequ(str, "angle") && count == 2 && op->next->type == ast_double) {
                     angle = op->next->val._double;
                 }
-                else if (strstr(str, "edge") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                else if (strequ(str, "edge") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     a = op->next->val._double;
                     b = op->next->next->val._double;
                 }
-                else if (strstr(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                else if (strequ(str, "pos") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
-                else if (strstr(str, "text") && count == 2 && op->next->type == ast_string) {
+                else if (strequ(str, "text") && count == 2 && op->next->type == ast_string) {
                     s = QString::fromLocal8Bit(op->next->val._string);
                 }
             }
@@ -1025,35 +1106,93 @@ namespace clib {
     {
         auto &val = frame->val;
         auto i = VM_OP(val);
+        auto not_ret = false;
         while (i) {
-            if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
+            if (i->type == ast_qexpr && i->val._v.count >= 1 && i->val._v.child->type == ast_literal) {
                 auto op = i->val._v.child;
                 auto count = i->val._v.count;
                 auto str = op->val._string;
-                if (strstr(str, "gravity") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                if (strequ(str, "gravity") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     auto x = op->next->val._double;
                     auto y = op->next->next->val._double;
                     vm->get_world()->set_gravity(v2(x, y));
                 }
-                else if (strstr(str, "cycle") && count == 2 && op->next->type == ast_int) {
+                else if (strequ(str, "cycle") && count == 2 && op->next->type == ast_int) {
                     auto cycle = op->next->val._int;
                     vm->get_world()->set_cycle(cycle);
                 }
-                else if (strstr(str, "force") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                else if (strequ(str, "force") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
                     auto x = op->next->val._double;
                     auto y = op->next->next->val._double;
                     vm->get_world()->move(v2(x, y));
                 }
-                else if (strstr(str, "rotate") && count == 2 && op->next->type == ast_double) {
+                else if (strequ(str, "rotate") && count == 2 && op->next->type == ast_double) {
                     auto angle = M_PI * op->next->val._double / 180.0;
                     vm->get_world()->rotate(angle);
+                }
+                else if (strequ(str, "clear") && count == 1) {
+                    vm->get_world()->reset();
+                }
+                else if (strequ(str, "record") && count == 1) {
+                    if (frame->arg != (void *)1) {
+                        vm->get_world()->record();
+                        frame->arg = (void *)1;
+                    }
+                }
+                else if (strequ(str, "wait") && count == 2 && op->next->type == ast_double) {
+                    auto offset = op->next->val._double;
+                    if (!vm->get_world()->reach(offset))
+                        not_ret = true;
+                }
+                else if (strequ(str, "bound") && count == 1) {
+                    vm->get_world()->make_bound();
                 }
             }
             i = i->next;
         }
-#if LISP_DEBUG
-        qDebug("[DEBUG] Create box by lisp.\n");
-#endif
+        if (not_ret)
+            return s_sleep;
         VM_RET(VM_NIL);
+    }
+
+    status_t builtins::attr(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        if (val->val._v.count < 2)
+            vm->error("attr requires more than 1 args");
+        auto op = VM_OP(val);
+        if (op->type != ast_qexpr)
+            vm->error("attr requires Q-exp at first");
+        auto v = vm->copy(op);
+        v->val._v.count = val->val._v.count - 1;
+        vm->mem.push_root(v);
+#if SHOW_ALLOCATE_NODE
+        qDebug("[DEBUG] ALLOC | addr: 0x%p, node: %-10s, for word\n", v, cast::ast_str(v->type).c_str());
+#endif
+        auto i = op->next;
+        auto local = v->val._v.child;
+        while (i)
+        {
+            local->next = vm->copy(i);
+            local = local->next;
+            i = i->next;
+        }
+        vm->mem.pop_root();
+        VM_RET(v);
+    }
+
+    status_t builtins::random(cvm * vm, cframe * frame)
+    {
+        auto &val = frame->val;
+        if (val->val._v.count != 3)
+            vm->error("attr requires 2 args");
+        auto op = VM_OP(val);
+        if (op->type != ast_double || op->next->type != ast_double)
+            vm->error("attr requires 2 double args");
+        auto v = vm->val_obj(ast_double);
+        std::default_random_engine e((uint32_t)time(nullptr));
+        std::uniform_real_distribution<decimal> dist{ op->val._double, op->next->val._double };
+        v->val._double = dist(e);
+        VM_RET(v);
     }
 }

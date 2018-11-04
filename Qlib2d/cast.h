@@ -8,8 +8,8 @@
 
 #include "memory.h"
 
-#define AST_NODE_MEM (32 * 1024)
-#define AST_STR_MEM (16 * 1024)
+#define AST_NODE_MEM (2 * 1024)
+#define AST_STR_MEM (2 * 1024)
 
 namespace clib {
 
@@ -95,6 +95,7 @@ namespace clib {
 
         static void print(ast_node *node, int level, std::ostream &os);
         static const string_t &ast_str(ast_t type);
+        static int ast_prior(ast_t type);
 
         static ast_node *index(ast_node *node, int index);
         static ast_node *index(ast_node *node, const string_t &index);

@@ -45,6 +45,7 @@ namespace clib {
         static status_t is_null(cvm *vm, cframe *frame);
         static status_t type(cvm *vm, cframe *frame);
         static status_t str(cvm *vm, cframe *frame);
+        static status_t word(cvm *vm, cframe *frame);
 
         static status_t print(cvm *vm, cframe *frame);
 
@@ -54,6 +55,8 @@ namespace clib {
 
         static status_t scene(cvm *vm, cframe *frame);
         static status_t conf(cvm *vm, cframe *frame);
+        static status_t attr(cvm *vm, cframe *frame);
+        static status_t random(cvm *vm, cframe *frame);
     };
 }
 

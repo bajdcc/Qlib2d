@@ -19,6 +19,10 @@ namespace clib {
     QString c2d_world::title("[TITLE]"); // 标题
     c2d_world *world = nullptr;
 
+    QTime cycles_time = QTime::currentTime();
+    int cycles = 0;
+    qreal cycles_ps = 0.0;
+
     c2d_polygon *c2d_world::make_polygon(decimal mass, const std::vector<v2> &vertices, const v2 &pos, bool statics) {
         auto polygon = std::make_unique<c2d_polygon>(global_id++, mass, vertices);
         polygon->pos = pos;
@@ -277,10 +281,17 @@ namespace clib {
         // 计算每帧时间间隔
         dt = last_clock.msecsTo(now) * 0.001;
 
+        auto cycles_span = cycles_time.msecsTo(now);
+        if (cycles_span > 1000) {
+            cycles_ps = 1000 * cycles / cycles_span;
+            cycles_time = now;
+            cycles = 0;
+        }
+
         // 锁帧
         if (dt > FRAME_SPAN) {
-            dt = std::min(dt, FRAME_SPAN);
             dt_inv = 1.0 / dt;
+            dt = std::min(dt, FRAME_SPAN * 1.5);
             last_clock = now;
         }
         else
@@ -373,7 +384,8 @@ namespace clib {
         auto w = size.width();
         auto h = size.height();
         helper->paint_text(10, 20, "Qlib2d @bajdcc", Q2dHelper::PAINT_TYPE::NormalText);
-        helper->paint_text(w - 110, 20, QString().sprintf("FPS: %.1f", dt_inv), Q2dHelper::PAINT_TYPE::NormalText);
+        helper->paint_text(w - 140, 20, QString().sprintf("FPS: %.1f", dt_inv), Q2dHelper::PAINT_TYPE::NormalText);
+        helper->paint_text(w - 140, 40, QString().sprintf("IPS: %.1f", cycles_ps), Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(10, h - 20, "#c5p2", Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(w - 200, h - 20, QString::fromLocal8Bit("碰撞: %1, 休眠: %2")
             .arg(collisions.size()).arg(sleep_bodies()), Q2dHelper::PAINT_TYPE::NormalText);
@@ -389,7 +401,9 @@ namespace clib {
             auto i = 1;
             QString str;
             foreach(str, animation_queue) {
-                helper->paint_text(20, y += 10, QString("[Queue #%1] %2").arg(i++).arg(str), Q2dHelper::PAINT_TYPE::CodeText);
+                if (i > 8)
+                    break;
+                helper->paint_text(20, y += 15, QString("[Queue #%1] %2").arg(i++).arg(str), Q2dHelper::PAINT_TYPE::CodeText);
             }
         }
     }
@@ -448,6 +462,14 @@ namespace clib {
     void c2d_world::clear() {
         stop_animation();
         global_id = 1;
+        bodies.clear();
+        static_bodies.clear();
+        collisions.clear();
+        joints.clear();
+    }
+
+    void clib::c2d_world::reset()
+    {
         bodies.clear();
         static_bodies.clear();
         collisions.clear();
@@ -586,9 +608,15 @@ namespace clib {
             case 7: { // 脚本
                 title = QString::fromLocal8Bit("【场景七】脚本");
                 make_bound();
-                start_animation(1);
+                start_animation(2);
             }
                 break;
+            case 8: { // 脚本
+                title = QString::fromLocal8Bit("【场景八】特效");
+                make_bound();
+                start_animation(3);
+            }
+                    break;
             default: {
                 title = QString::fromLocal8Bit("【默认场景】常见几何图形");
                 make_bound();
@@ -615,7 +643,7 @@ namespace clib {
         if (animation_id == 0)
         {
             animation_code = str;
-            start_animation(2);
+            start_animation(1);
             str.clear();
         }
         else
@@ -666,6 +694,16 @@ namespace clib {
         this->cycle = cycle;
     }
 
+    void clib::c2d_world::record()
+    {
+        record_now = QTime::currentTime();
+    }
+
+    bool clib::c2d_world::reach(const decimal & d)
+    {
+        return record_now.addMSecs(d * 1000.0) < QTime::currentTime();
+    }
+
     void c2d_world::set_helper(Q2dHelper * helper)
     {
         this->helper = helper;
@@ -673,11 +711,12 @@ namespace clib {
 
     void c2d_world::start_animation(uint32_t id) {
         if (animation_id != id) {
-            if (id == 1 || id == 2) {
-                if (id == 1) {
+            if (id >= 1 && id <= 3) {
+                if (id >= 2) {
                     animation_code = QString(R"(+ __author__ " " __project__)");
-                    auto code = scene_7();
+                    auto code = get_script(id);
                     QString c;
+                    animation_queue.clear();
                     foreach(c, code.split("\n")) {
                         if (!c.isEmpty())
                             animation_queue.enqueue(c);
@@ -707,20 +746,21 @@ namespace clib {
             animation_id = 0;
             if (!animation_queue.empty()) {
                 animation_code = animation_queue.dequeue();
-                start_animation(2);
+                start_animation(1);
             }
         }
     }
 
     void c2d_world::run_animation() {
         try {
-            auto val = vm.run(cycle);
+            auto val = vm.run(cycle, cycles);
             if (val != nullptr) {
                 std::stringstream ss;
                 clib::cvm::print(val, ss);
                 auto output = QString::fromLocal8Bit(ss.str().c_str());
                 emit helper->output(output, 0);
                 vm.gc();
+                vm.dump();
                 stop_animation();
             }
         } catch (const cexception &e) {
