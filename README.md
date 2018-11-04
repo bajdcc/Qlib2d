@@ -13,3 +13,4 @@ clib2d with lisp using Qt (VS2017,x64)
 ## 文章
 
 - [【物理引擎系列】正式启用Qt！](https://zhuanlan.zhihu.com/p/48410758)
+- [【物理引擎系列】弹幕粒子特效](https://zhuanlan.zhihu.com/p/48533229)
