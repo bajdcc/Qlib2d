@@ -1,5 +1,7 @@
 # Qlib2d
 
+[![Build status](https://ci.appveyor.com/api/projects/status/x2tlhf38raho27sh?svg=true)](https://ci.appveyor.com/project/bajdcc/qlib2d)
+
 clib2d with lisp using Qt (VS2017,x64)
 
 参考先前的cliblisp和clib2d库，将代码整合进Qt平台。

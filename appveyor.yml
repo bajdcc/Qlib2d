@@ -6,7 +6,7 @@ platform: x64
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      QTDIR: C:\Qt\5.11.2\msvc2017_64
+      QTDIR: C:\Qt\5.11\msvc2017_64
       VCARCH: x64
 
 branches:
@@ -21,7 +21,7 @@ init:
     )
 
 before_build:
-  - set PATH="%QTDIR%\bin";%PATH%;
+  - set PATH=%QTDIR%\bin;%PATH%
 
 build_script:
   - cd Qlib2d
