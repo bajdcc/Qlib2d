@@ -1,0 +1,39 @@
+version: 1.0.{build}.{branch}
+image: Visual Studio 2017
+configuration: Release
+platform: x64
+
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      QTDIR: C:\Qt\5.11.2\msvc2017_64
+      VCARCH: x64
+
+branches:
+  only:
+    - master
+
+init:
+  - if %VCARCH% == x86 (
+      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %VCARCH%
+    ) else (
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %VCARCH%
+    )
+
+before_build:
+  - set PATH="%QTDIR%\bin";%PATH%;
+
+build_script:
+  - cd Qlib2d
+  - qmake Qlib2d.pro -spec win32-msvc
+  - nmake
+  
+artifacts:
+- path: x64/Release
+  name: Release
+
+matrix:
+  fast_finish: true
+
+on_failure:
+  - echo Failed

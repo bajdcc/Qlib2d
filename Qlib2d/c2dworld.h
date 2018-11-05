@@ -101,6 +101,8 @@ namespace clib {
         static QTime last_clock;
         static decimal dt;
         static decimal dt_inv;
+        static QTime fpst;
+        static decimal fps;
         static bool paused; //  «∑Ò‘›Õ£
         static QString title; // ±ÍÃ‚
 

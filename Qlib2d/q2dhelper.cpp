@@ -17,7 +17,7 @@ Q2dHelper::~Q2dHelper()
 {
 }
 
-void Q2dHelper::paint(QPainter * painter, QPaintEvent * event, int elapsed)
+void Q2dHelper::paint(QPainter * painter, QPaintEvent * event)
 {
     auto rect = event->rect();
     size = rect.size();
@@ -40,7 +40,7 @@ void Q2dHelper::paint_polygon(const std::vector<clib::v2>& v, PAINT_TYPE type)
     vp.resize(v.size());
     std::transform(v.begin(), v.end(), vp.begin(), world2screen);
     select(type);
-    painter->drawPolygon(vp.data(), vp.size());
+    painter->drawPolygon(vp.data(), (int)vp.size());
 }
 
 void Q2dHelper::paint_point(const clib::v2 & v, PAINT_TYPE type)

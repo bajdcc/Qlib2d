@@ -11,8 +11,8 @@ namespace clib {
     contact::contact(v2 _pos) : pos(_pos), ta(C2D_POLYGON), tb(C2D_POLYGON) {}
 
     contact::contact(v2 _pos, size_t index) : contact(_pos) {
-        A.polygon.idx = index;
-        B.polygon.idx = index;
+        A.polygon.idx = (int)index;
+        B.polygon.idx = (int)index;
     }
 
     bool contact::operator==(const contact &other) const {

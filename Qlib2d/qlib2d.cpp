@@ -7,7 +7,7 @@ Qlib2d::Qlib2d(QWidget *parent)
     ui.setupUi(this);
     connect(this, SIGNAL(send_command(QString &)), ui.opengl2d->get_helper(), SLOT(exec(QString &)));
     connect(ui.opengl2d, SIGNAL(escape()), this, SLOT(escape()));
-    connect(ui.opengl2d->get_helper(), SIGNAL(output(QString &, int)), this, SLOT(output(QString &, int)));
+    connect(ui.opengl2d->get_helper(), SIGNAL(output(QString, int)), this, SLOT(output(QString, int)));
 }
 
 void Qlib2d::execLispCommand()
@@ -31,7 +31,7 @@ void Qlib2d::escape()
     close();
 }
 
-void Qlib2d::output(QString & str, int type)
+void Qlib2d::output(QString str, int type)
 {
     if (type == 0)
         ui.output->setText(str);

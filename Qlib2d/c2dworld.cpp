@@ -15,6 +15,8 @@ namespace clib {
     QTime c2d_world::last_clock = QTime::currentTime();
     decimal c2d_world::dt = FRAME_SPAN;
     decimal c2d_world::dt_inv = 1.0 * FPS;
+    QTime c2d_world::fpst;
+    decimal c2d_world::fps = 1.0 * FPS;
     bool c2d_world::paused = false; // 是否暂停
     QString c2d_world::title("[TITLE]"); // 标题
     c2d_world *world = nullptr;
@@ -280,23 +282,18 @@ namespace clib {
         auto now = QTime::currentTime();
         // 计算每帧时间间隔
         dt = last_clock.msecsTo(now) * 0.001;
+        dt = std::min(dt, FRAME_SPAN);
+        dt_inv = 1.0 / dt;
+        last_clock = now;
+        auto fpsd = fpst.msecsTo(now) * 0.001;
+        fps = 1.0 / fpsd;
+        fpst = now;
 
         auto cycles_span = cycles_time.msecsTo(now);
         if (cycles_span > 1000) {
             cycles_ps = 1000 * cycles / cycles_span;
             cycles_time = now;
             cycles = 0;
-        }
-
-        // 锁帧
-        if (dt > FRAME_SPAN) {
-            dt_inv = 1.0 / dt;
-            dt = std::min(dt, FRAME_SPAN * 1.5);
-            last_clock = now;
-        }
-        else
-        {
-            return;
         }
 
         if (!paused) {
@@ -384,7 +381,7 @@ namespace clib {
         auto w = size.width();
         auto h = size.height();
         helper->paint_text(10, 20, "Qlib2d @bajdcc", Q2dHelper::PAINT_TYPE::NormalText);
-        helper->paint_text(w - 140, 20, QString().sprintf("FPS: %.1f", dt_inv), Q2dHelper::PAINT_TYPE::NormalText);
+        helper->paint_text(w - 140, 20, QString().sprintf("FPS: %.1f", fps), Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(w - 140, 40, QString().sprintf("IPS: %.1f", cycles_ps), Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(10, h - 20, "#c5p2", Q2dHelper::PAINT_TYPE::NormalText);
         helper->paint_text(w - 200, h - 20, QString::fromLocal8Bit("碰撞: %1, 休眠: %2")

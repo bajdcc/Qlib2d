@@ -231,8 +231,8 @@ namespace clib {
 
         decltype(c.contacts) contacts;
         // 假定两个接触点（即idxA两端点）
-        contacts.emplace_back(bodyA->vertex(c.A.polygon.idx), -bodyA->index(c.A.polygon.idx) - 1);
-        contacts.emplace_back(bodyA->vertex(c.A.polygon.idx + 1), -bodyA->index(c.A.polygon.idx + 1) - 1);
+        contacts.emplace_back(bodyA->vertex(c.A.polygon.idx), -(int)bodyA->index(c.A.polygon.idx) - 1);
+        contacts.emplace_back(bodyA->vertex(c.A.polygon.idx + 1), -(int)bodyA->index(c.A.polygon.idx + 1) - 1);
 
         auto &pos0 = contacts[0].pos;
         auto &pos1 = contacts[1].pos;

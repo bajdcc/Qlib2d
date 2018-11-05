@@ -27,7 +27,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-    int elapsed{ 0 };
     Q2dHelper helper;
 };
 

@@ -6,14 +6,9 @@
 #ifndef CLIB2D_C2D_H
 #define CLIB2D_C2D_H
 
-#include <limits>
-#include <string>
-#include <cmath>
-#include <chrono>
-
 #define LISP_CYCLE 10
 #define LISP_DEBUG 0
-#define FPS 30
+#define FPS 60
 #define PAINT_SPAN (1000 / FPS)
 #define GRAVITY -9.8
 #define FRAME_SPAN (1.0 / FPS)

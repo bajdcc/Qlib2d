@@ -75,14 +75,17 @@
       <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</Define>
       <ForceInclude>stdafx.h;../../%(Filename)%(Extension)</ForceInclude>
+      <QTDIR>$(QTDIR)</QTDIR>
     </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
       <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
     </QtUic>
     <QtRcc>
       <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
       <OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -110,14 +113,17 @@
       <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtOpenGLExtensions;$(QTDIR)\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</Define>
       <ForceInclude>stdafx.h;../../%(Filename)%(Extension)</ForceInclude>
+      <QTDIR>$(QTDIR)</QTDIR>
     </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
       <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
     </QtUic>
     <QtRcc>
       <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
       <OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -182,7 +188,10 @@
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_OPENGLEXTENSIONS_LIB;QT_WIDGETS_LIB</Define>
     </QtMoc>
     <ClInclude Include="types.h" />
-    <QtMoc Include="qlib2d.h" />
+    <QtMoc Include="qlib2d.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include;.\GeneratedFiles\$(ConfigurationName);C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtCore;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtGui;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include;.\GeneratedFiles\$(ConfigurationName);C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtCore;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtGui;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtANGLE;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtOpenGL;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtOpenGLExtensions;C:\Qt\Qt5.11.2\5.11.2\msvc2017_64\include\QtWidgets;%(AdditionalIncludeDirectories)</IncludePath>
+    </QtMoc>
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -205,7 +214,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_x64="$(DefaultQtVersion)" MocOptions="" />
+      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_x64="5.11" MocOptions="" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

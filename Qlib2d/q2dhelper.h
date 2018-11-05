@@ -10,7 +10,7 @@ public:
     Q2dHelper();
     ~Q2dHelper();
 
-    void paint(QPainter *painter, QPaintEvent *event, int elapsed);
+    void paint(QPainter *painter, QPaintEvent *event);
 
     enum PAINT_TYPE
     {
@@ -49,7 +49,7 @@ public:
     static QPointF world2screen(const clib::v2 &v);
 
 signals:
-    void output(QString &, int);
+    void output(QString, int);
 
 private:
     void select(PAINT_TYPE type);

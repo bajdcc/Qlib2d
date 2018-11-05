@@ -111,7 +111,7 @@ namespace clib {
 
         status_t call(csub fun, cval *val, cval *env, cval **ret);
 
-        int calc(int op, ast_t type, cval *r, cval *v, cval *env);
+        int calc(int op, ast_t type, cval *r, cval *v);
         void promote(ast_t type, cval *v);
         cval *calc_op(int op, cval *val, cval *env);
         cval *calc_symbol(const char *sym, cval *env);

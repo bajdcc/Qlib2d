@@ -160,7 +160,7 @@ namespace clib {
     DEFINE_VAL_OP(double)
 #undef DEFINE_VAL_OP
 
-    int cvm::calc(int op, ast_t type, cval *r, cval *v, cval *env) {
+    int cvm::calc(int op, ast_t type, cval *r, cval *v) {
         switch (type) {
 #define DEFINE_CALC_TYPE(t) \
             case ast_##t: \
@@ -288,7 +288,7 @@ namespace clib {
                 auto b = s2.str();
                 return val_bool(a == b);
             }
-            return val_bool(calc(op, v->type, v, v2, env) != 0);
+            return val_bool(calc(op, v->type, v, v2) != 0);
         }
         auto r = val_obj(v->type);
         std::memcpy((char *) &r->val, (char *) &v->val, sizeof(v->val));
@@ -307,11 +307,11 @@ namespace clib {
                     }
                     promote(_r->type, _v);
                 }
-                calc(op, _r->type, _r, _v, env);
+                calc(op, _r->type, _r, _v);
                 v = v->next;
             }
         } else {
-            calc(op, r->type, r, v, env);
+            calc(op, r->type, r, v);
         }
         return r;
     }
@@ -780,6 +780,7 @@ namespace clib {
     }
 
     status_t builtins::begin(cvm *vm, cframe *frame) {
+        Q_UNUSED(vm);
         auto &val = frame->val;
         auto op = VM_OP(val);
         while (op->next) {
@@ -1094,7 +1095,6 @@ namespace clib {
         if (val->val._v.count != 2)
             vm->error("scene requires 1 args");
         auto op = VM_OP(val);
-        decltype(op->val._string) s;
         if (op->type == ast_int) {
             auto i = op->val._int;
             vm->get_world()->scene(i);

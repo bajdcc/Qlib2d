@@ -170,7 +170,6 @@ namespace clib {
         void *_alloc(size_t size) {
             if (size == 0)
                 return nullptr;
-            auto old_size = size;
             size = block_align(size);
             if (size >= block_available_size)
                 return nullptr;

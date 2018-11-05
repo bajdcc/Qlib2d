@@ -22,7 +22,6 @@ Q2dHelper * Q2dImpl::get_helper()
 
 void Q2dImpl::animate()
 {
-    elapsed = (elapsed + qobject_cast<QTimer*>(sender())->interval()) % 1000;
     update();
 }
 
@@ -31,7 +30,7 @@ void Q2dImpl::paintEvent(QPaintEvent * event)
     QPainter painter;
     painter.begin(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    helper.paint(&painter, event, elapsed);
+    helper.paint(&painter, event);
     painter.end();
 }
 
