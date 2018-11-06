@@ -3,7 +3,7 @@
 class cexception : public std::exception
 {
 public:
-    explicit cexception(QString msg);
+    explicit cexception(QString msg) noexcept;
     ~cexception();
 
     QString msg;

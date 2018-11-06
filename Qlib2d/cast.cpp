@@ -4,6 +4,7 @@
 //
 
 #include "stdafx.h"
+#include "cexception.h"
 #include "cast.h"
 
 namespace clib {
@@ -23,8 +24,7 @@ namespace clib {
 
     ast_node *cast::new_node(ast_t type) {
         if (nodes.available() < 64) {
-            qDebug("AST ERROR: 'nodes' out of memory\n");
-            throw std::exception();
+            throw cexception("AST ERROR: 'nodes' out of memory");
         }
         auto node = nodes.alloc<ast_node>();
         memset(node, 0, sizeof(ast_node));
@@ -106,8 +106,7 @@ namespace clib {
 
     void cast::set_str(ast_node *node, const string_t &str) {
         if (strings.available() < 64) {
-            qDebug("AST ERROR: 'strings' out of memory\n");
-            throw std::exception();
+            throw cexception("AST ERROR: 'strings' out of memory");
         }
         auto len = str.length();
         auto s = strings.alloc_array<char>(len + 1);

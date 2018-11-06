@@ -2,7 +2,7 @@
 #include "cexception.h"
 
 
-cexception::cexception(QString msg) : msg(msg)
+cexception::cexception(QString msg) noexcept : msg(msg)
 {
 
 }

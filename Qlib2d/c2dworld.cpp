@@ -175,14 +175,14 @@ namespace clib {
             auto kn = a.mass.inv + b.mass.inv +
                 std::abs(a.inertia.inv) * nA * nA +
                 std::abs(b.inertia.inv) * nB * nB;
-            contact.mass_normal = kn > 0 ? COLL_NORMAL_SCALE / kn : 0.0;
+            contact.mass_normal = COLL_NORMAL_SCALE / kn;
             auto tA = contact.ra.cross(tangent);
             auto tB = contact.rb.cross(tangent);
             auto kt = a.mass.inv + b.mass.inv +
                 std::abs(a.inertia.inv) * tA * tA +
                 std::abs(b.inertia.inv) * tB * tB;
-            contact.mass_tangent = kt > 0 ? COLL_TANGENT_SCALE / kt : 0.0;
-            contact.bias = -kBiasFactor * dt_inv * std::min(0.0, contact.sep);
+            contact.mass_tangent = COLL_TANGENT_SCALE / kt;
+            contact.bias = -kBiasFactor * dt_inv * contact.sep;
         }
     }
 
