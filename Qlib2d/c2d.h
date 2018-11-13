@@ -23,7 +23,7 @@
 #define COLL_CIR_POLY_BIAS 2e-4
 #define COLL_CO 0.1
 #define ENABLE_SLEEP 1
-#define CIRCLE_N 60
+#define CIRCLE_N 64
 #define PI2 (2 * M_PI)
 
 namespace clib {

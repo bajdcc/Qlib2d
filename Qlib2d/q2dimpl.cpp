@@ -60,10 +60,10 @@ void Q2dImpl::keyPressEvent(QKeyEvent * event)
         helper.get_world().move(clib::v2(0.02, 0));
         break;
     case Qt::Key_Q:
-        helper.get_world().rotate(0.2);
+        helper.get_world().rotate(1.0);
         break;
     case Qt::Key_E:
-        helper.get_world().rotate(-0.2);
+        helper.get_world().rotate(-1.0);
         break;
     case Qt::Key_G:
         helper.get_world().toggle_gravity();
