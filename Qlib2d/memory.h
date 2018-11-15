@@ -313,14 +313,6 @@ namespace clib {
                     ptr = ptr->prev;
                 }
             }
-            if (uses0 != DEFAULT_ALLOC_BLOCK_SIZE)
-            {
-                auto j = 6;
-            }
-            if (usings + block_available_size != DEFAULT_ALLOC_BLOCK_SIZE - 1)
-            {
-                auto j = 6;
-            }
             assert(uses0 == uses1);
             assert(uses0 == DEFAULT_ALLOC_BLOCK_SIZE);
             assert(usings + block_available_size == DEFAULT_ALLOC_BLOCK_SIZE - 1);
