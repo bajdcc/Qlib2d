@@ -13,4 +13,9 @@ namespace clib {
     v2 c2d_body::rotate(const v2 &v) const {
         return m2().rotate(angle).rotate(v);
     }
+
+    bool c2d_body::is_life_over() const
+    {
+        return !std::isinf(life) && life_tick < 0;
+    }
 }

@@ -53,6 +53,8 @@ namespace clib {
         // 去除休眠物体的碰撞
         void collision_remove_sleep();
 #endif
+        // 去除生命到期的物体
+        void remove_lifeover();
 
         void step(Q2dHelper * helper);
         void move(const v2 &v);

@@ -969,7 +969,9 @@ namespace clib {
         auto w = 0.0;
         auto h = 0.0;
         v2 pos;
+        v2 v;
         QString s;
+        decimal snow_k{ 0 }, life{ inf };
         while (i) {
             if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
                 auto op = i->val._v.child;
@@ -986,14 +988,31 @@ namespace clib {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
+                else if (strequ(str, "v") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    v.x = op->next->val._double;
+                    v.y = op->next->next->val._double;
+                }
                 else if (strequ(str, "text") && count == 2 && op->next->type == ast_string) {
                     s = QString::fromLocal8Bit(op->next->val._string);
+                }
+                else if (strequ(str, "snow") && count == 2 && op->next->type == ast_double) {
+                    snow_k = op->next->val._double;
+                }
+                else if (strequ(str, "life") && count == 2 && op->next->type == ast_double) {
+                    life = op->next->val._double;
                 }
             }
             i = i->next;
         }
         auto obj = vm->get_world()->make_rect(mass, w, h, pos);
         obj->text = s;
+        obj->V = v;
+        if (snow_k != 0.0)
+            obj->snow_k = snow_k;
+        if (!std::isinf(life)) {
+            obj->life = life;
+            obj->life_tick = life;
+        }
 #if LISP_DEBUG
         qDebug("[DEBUG] Create box by lisp.\n");
 #endif
@@ -1007,7 +1026,9 @@ namespace clib {
         auto mass = 1.0;
         auto r = 0.0;
         v2 pos;
+        v2 v;
         QString s;
+        decimal snow_k{ 0 }, life{ inf };
         while (i) {
             if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
                 auto op = i->val._v.child;
@@ -1023,14 +1044,31 @@ namespace clib {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
+                else if (strequ(str, "v") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    v.x = op->next->val._double;
+                    v.y = op->next->next->val._double;
+                }
                 else if (strequ(str, "text") && count == 2 && op->next->type == ast_string) {
                     s = QString::fromLocal8Bit(op->next->val._string);
+                }
+                else if (strequ(str, "snow") && count == 2 && op->next->type == ast_double) {
+                    snow_k = op->next->val._double;
+                }
+                else if (strequ(str, "life") && count == 2 && op->next->type == ast_double) {
+                    life = op->next->val._double;
                 }
             }
             i = i->next;
         }
         auto obj = vm->get_world()->make_circle(mass, r, pos);
         obj->text = s;
+        obj->V = v;
+        if (snow_k != 0.0)
+            obj->snow_k = snow_k;
+        if (!std::isinf(life)) {
+            obj->life = life;
+            obj->life_tick = life;
+        }
 #if LISP_DEBUG
         qDebug("[DEBUG] Create circle by lisp.\n");
 #endif
@@ -1044,6 +1082,7 @@ namespace clib {
         auto mass = 1.0;
         auto angle = 0.0;
         v2 pos;
+        v2 v;
         auto a = 0.0;
         auto b = 0.0;
         QString s;
@@ -1052,6 +1091,7 @@ namespace clib {
             {0, 0},
             {0, 0}
         };
+        decimal snow_k{ 0 }, life{ inf };
         while (i) {
             if (i->type == ast_qexpr && i->val._v.count > 1 && i->val._v.child->type == ast_literal) {
                 auto op = i->val._v.child;
@@ -1071,8 +1111,18 @@ namespace clib {
                     pos.x = op->next->val._double;
                     pos.y = op->next->next->val._double;
                 }
+                else if (strequ(str, "v") && count == 3 && op->next->type == ast_double && op->next->next->type == ast_double) {
+                    v.x = op->next->val._double;
+                    v.y = op->next->next->val._double;
+                }
                 else if (strequ(str, "text") && count == 2 && op->next->type == ast_string) {
                     s = QString::fromLocal8Bit(op->next->val._string);
+                }
+                else if (strequ(str, "snow") && count == 2 && op->next->type == ast_double) {
+                    snow_k = op->next->val._double;
+                }
+                else if (strequ(str, "life") && count == 2 && op->next->type == ast_double) {
+                    life = op->next->val._double;
                 }
             }
             i = i->next;
@@ -1083,6 +1133,13 @@ namespace clib {
         vertices[2].y = b * std::sin(angle);
         auto obj = vm->get_world()->make_polygon(mass, vertices, pos);
         obj->text = s;
+        obj->V = v;
+        if (snow_k != 0.0)
+            obj->snow_k = snow_k;
+        if (!std::isinf(life)) {
+            obj->life = life;
+            obj->life_tick = life;
+        }
 #if LISP_DEBUG
         qDebug("[DEBUG] Create triangle by lisp.\n");
 #endif

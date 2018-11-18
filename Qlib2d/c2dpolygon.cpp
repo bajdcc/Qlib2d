@@ -191,6 +191,32 @@ namespace clib {
     }
 
     void c2d_polygon::pass3(const v2 &gravity) {
+        if (!std::isinf(life)) {
+            life_tick -= c2d_world::dt;
+        }
+        if (snow_k != 0.0 && !V.zero(EPSILON_V)) {
+            angleV *= SNOW_ANGLE;
+            auto cases = (V.x > 0 ? 1 : 0) | (V.y > 0 ? 2 : 0);
+            switch (cases)
+            {
+            case 0: // 第三象限，往左下飘落，力的方向为-90度
+                F += V.rotate(-M_PI_2) * snow_k;
+                break;
+            case 1: // 第四象限，往右下飘落，力的方向为90度
+                F += V.rotate(M_PI_2) * snow_k;
+                break;
+            case 2: // 第二象限，往左上飘落，力的方向为-90度
+                F += V.rotate(-M_PI_2) * snow_k * 0.1;
+                F -= V * snow_k * 0.9;
+                break;
+            case 3: // 第一象限，往右上飘落，力的方向为90度
+                F += V.rotate(M_PI_2) * snow_k * 0.1;
+                F -= V * snow_k * 0.9;
+                break;
+            default:
+                break;
+            }
+        }
         F += gravity * mass.value * c2d_world::dt;
         Fa += F;
     }
@@ -226,7 +252,12 @@ namespace clib {
         }
         auto p = pos + center;
         if (!text.isEmpty()) {
-            helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::AnimationText);
+            if (std::isinf(life) && life != 0.0)
+                helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::AnimationText);
+            else if (life_tick > 0) {
+                auto lightness = ((int)std::floor(255.0 * life_tick / life)) & 0xff;
+                helper->paint_text(p, angle, text, Q2dHelper::PAINT_TYPE::AnimationText, lightness);
+            }
             return;
         }
 #if ENABLE_SLEEP

@@ -277,6 +277,19 @@ namespace clib {
     }
 #endif
 
+    void c2d_world::remove_lifeover() {
+        erase_if(collisions, [&](auto &c) {
+            if (c.second.bodyA->is_life_over())
+                return true;
+            if (c.second.bodyB->is_life_over())
+                return true;
+            return false;
+        });
+        erase_if(bodies, [&](auto &b) {
+            return b->is_life_over();
+        });
+    }
+
     void c2d_world::step(Q2dHelper * helper) {
 
         auto now = QTime::currentTime();
@@ -403,6 +416,8 @@ namespace clib {
                 helper->paint_text(20, y += 15, QString("[Queue #%1] %2").arg(i++).arg(str), Q2dHelper::PAINT_TYPE::CodeText);
             }
         }
+
+        remove_lifeover();
     }
 
     void c2d_world::move(const v2 &v) {
@@ -608,12 +623,18 @@ namespace clib {
                 start_animation(2);
             }
                 break;
-            case 8: { // 脚本
-                title = QString::fromLocal8Bit("【场景八】特效");
+            case 8: { // 脚本 - 双影
+                title = QString::fromLocal8Bit("【场景八】弹幕特效 - 双影");
                 make_bound();
                 start_animation(3);
             }
-                    break;
+                break;
+            case 9: { // 脚本 - 默
+                title = QString::fromLocal8Bit("【场景九】弹幕特效 - 默");
+                make_bound();
+                start_animation(4);
+            }
+                break;
             default: {
                 title = QString::fromLocal8Bit("【默认场景】常见几何图形");
                 make_bound();
@@ -708,7 +729,7 @@ namespace clib {
 
     void c2d_world::start_animation(uint32_t id) {
         if (animation_id != id) {
-            if (id >= 1 && id <= 3) {
+            if (id >= 1 && id <= 10) {
                 if (id >= 2) {
                     animation_code = QString(R"(+ __author__ " " __project__)");
                     auto code = get_script(id);

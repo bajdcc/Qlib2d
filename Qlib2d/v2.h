@@ -60,6 +60,10 @@ namespace clib {
         v2 N() const;
 
         bool zero(decimal d) const;
+
+        v2 rotate(decimal theta) const;
+
+        v2 clamp(decimal d) const;
     };
 }
 

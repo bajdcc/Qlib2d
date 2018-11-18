@@ -58,6 +58,8 @@ namespace clib {
 
         virtual size_t edges() const = 0;
 
+        bool is_life_over() const;
+
         // 不想写那么多get/set，先public用着
 #if ENABLE_SLEEP
         bool sleep{false}; // 是否休眠
@@ -77,6 +79,9 @@ namespace clib {
         decimal M{0}; // 力矩
         decimal CO{COLL_CO}; // 弹性碰撞系数
         QString text;
+        decimal snow_k{0}; // 雪花阻力系数
+        decimal life{inf}; // 生命周期（单位：秒）
+        decimal life_tick{inf}; // 生命周期计时（单位：秒）
     };
 }
 

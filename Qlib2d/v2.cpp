@@ -85,4 +85,15 @@ namespace clib {
     bool v2::zero(decimal d) const {
         return std::abs(x) < d && std::abs(y) < d;
     }
+    v2 v2::rotate(decimal theta) const
+    {
+        const auto _sin = std::sin(theta);
+        const auto _cos = std::cos(theta);
+        return { _cos * x - _sin * y, _sin * x + _cos * y };
+    }
+
+    v2 v2::clamp(decimal d) const
+    {
+        return normalize() * (std::min(d, magnitude_square()));
+    }
 }

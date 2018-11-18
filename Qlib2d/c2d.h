@@ -24,6 +24,7 @@
 #define COLL_CO 0.1
 #define ENABLE_SLEEP 1
 #define CIRCLE_N 64
+#define SNOW_ANGLE 0.99
 #define PI2 (2 * M_PI)
 
 namespace clib {

@@ -80,6 +80,80 @@ lyc 4d 22.55d ""
 lyc 4d 23.88d "完"
 )");
         }
+        else if (id == 4) {
+            return QString::fromLocal8Bit(R"(
+conf `(gravity 0d -0.4d) `(clear) `(cycle 1000) `(record)
+def `latest-len 0
+def `latest-time 0d
+def `latest-str ""
+def `lyc-gen (\ `(til str) `(begin (def `latest-len (+ latest-len)) (conf (attr `wait til)) (circle (attr `pos (random -0.3d 0.3d) (random 0.25d 0.3d)) `(r 0.02d) (attr `v (random -0.01d 0.01d) (random -0.01d -0.1d)) `(mass 1d) `(snow 0.3d) `(life 10d) (attr `text str))))
+def `lyc-sen (\ `(L t SPAN) `(if (null? L) `(conf (attr `wait t)) `(begin (lyc-gen t (car L)) (lyc-sen (cdr L) (+ t SPAN) SPAN))))
+def `lyc-pri (\ `(t s) `(begin (def `L (word latest-str)) (def `SPAN (- t latest-time)) (lyc-sen L latest-time (/ SPAN (+ 2 (len L)))) (def `latest-time t) (def `latest-str s) (if (> latest-len 10) `(begin (def `latest-len 0)) `nil)))
+def `lyc (\ `(m t s) `(lyc-pri (+ (* m 60.0) t) s))
+lyc 00d 01.60d "默 - 那英"
+lyc 00d 02.59d "电影《何以笙箫默》主题插曲"
+lyc 00d 05.56d "词：尹约"
+lyc 00d 06.43d "曲：钱雷"
+lyc 00d 07.58d ""
+lyc 00d 39.14d "忍不住化身一条固执的鱼"
+lyc 00d 44.52d ""
+lyc 00d 46.10d "逆着洋流独自游到底"
+lyc 00d 50.59d ""
+lyc 00d 53.18d "年少时侯虔诚发过的誓"
+lyc 00d 59.43d "沉默地沉没在深海里"
+lyc 01d 04.37d ""
+lyc 01d 06.18d "重温几次"
+lyc 01d 09.71d "结局还是 失去你"
+lyc 01d 14.49d ""
+lyc 01d 19.95d "我被爱判处终身孤寂"
+lyc 01d 25.69d "不还手 不放手"
+lyc 01d 33.74d "笔下画不完的圆"
+lyc 01d 37.23d "心间填不满的缘"
+lyc 01d 40.43d "是你"
+lyc 01d 41.79d ""
+lyc 01d 47.39d "为何爱判处众生顾忌"
+lyc 01d 53.07d "挣不脱 逃不过"
+lyc 01d 59.65d ""
+lyc 02d 01.07d "眉头解不开的结"
+lyc 02d 04.53d "命中解不开的劫"
+lyc 02d 07.77d "是你"
+lyc 02d 09.78d ""
+lyc 02d 17.50d "啊 失去你"
+lyc 02d 27.27d ""
+lyc 02d 29.12d "啊 失去你"
+lyc 02d 41.72d ""
+lyc 03d 13.42d "忍不住化身一条固执的鱼"
+lyc 03d 18.89d ""
+lyc 03d 20.63d "逆着洋流独自游到底"
+lyc 03d 25.62d ""
+lyc 03d 27.30d "年少时侯虔诚发过的誓"
+lyc 03d 32.28d ""
+lyc 03d 33.79d "沉默地沉没在深海里"
+lyc 03d 38.46d ""
+lyc 03d 40.42d "周而复始"
+lyc 03d 42.91d ""
+lyc 03d 44.13d "结局还是 失去你"
+lyc 03d 48.81d ""
+lyc 03d 54.58d "我被爱判处终身孤寂"
+lyc 03d 59.92d "不还手 不放手"
+lyc 04d 06.47d ""
+lyc 04d 07.89d "笔下画不完的圆"
+lyc 04d 11.50d "心间填不满的缘"
+lyc 04d 14.54d "是你"
+lyc 04d 16.74d ""
+lyc 04d 21.58d "为何爱判处众生顾忌"
+lyc 04d 27.29d "挣不脱 逃不过"
+lyc 04d 34.61d ""
+lyc 04d 35.55d "眉头解不开的结"
+lyc 04d 38.98d "命中解不开的劫"
+lyc 04d 42.14d "是你"
+lyc 04d 44.82d ""
+lyc 04d 49.39d "啊 失去你"
+lyc 05d 01.36d ""
+lyc 05d 03.18d "啊 我失去你"
+lyc 05d 09.18d ""
+)");
+        }
         return R"(+ __author__ " " __project__)";
     }
 }
